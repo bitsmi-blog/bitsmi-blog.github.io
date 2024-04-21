@@ -1,28 +1,26 @@
-            "sharing": {
-                "facebook": true,
+"sharing": {
+	"facebook": false,
+	"google": false,
+	"github": false,
+	{% if site.github_username %}
+		"github_link": "https://github.com/{{ site.github_username }}",
+	{% else %}
+		"github_link": "https://github.com",
+	{% endif %}
 
-                "google": false,
+	"telegram": false,
+	"telegram_link": "https://t.me",
 
-                "github": true,
-              {% if site.github_username %}
-                "github_link": "https://github.com/{{ site.github_username }}",
-              {% else %}
-                "github_link": "https://github.com",
-              {% endif %}
+	"instapaper": false,
 
-                "telegram": false,
-                "telegram_link": "https://t.me",
+	"twitter": false,
+	{% if site.twitter_username %}
+		"twitter_link": "https://twitter.com/{{ site.twitter_username }}",
+	{% endif %}
 
-                "instapaper": false,
+	"vk": false,
 
-                "twitter": true,
-              {% if site.twitter_username %}
-                "twitter_link": "https://twitter.com/{{ site.twitter_username }}",
-              {% endif %}
+	"weibo": false,
 
-                "vk": false,
-
-                "weibo": false,
-
-                "all": ["facebook", "google", "twitter", "weibo", "instapaper", "github", "telegram"]
-            },
+	"all": ["facebook", "google", "twitter", "weibo", "instapaper", "github", "telegram"]
+},
