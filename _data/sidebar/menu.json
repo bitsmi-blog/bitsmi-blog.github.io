@@ -1,0 +1,15 @@
+[
+	{
+		"title": "References & Utilities",
+		"url": "/pages/references_and_utilities/"
+	},
+	{
+		"title": "Projects",
+		"children": [
+			{
+				"title": "Kumo",
+				"url": "/pages/projects/kumo/"
+			}
+		]
+	}
+]

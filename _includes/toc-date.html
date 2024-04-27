@@ -16,6 +16,12 @@
             }
             return true;
         }
+		
+		function expand(element) {
+			const li = $(element).closest("li");
+			li.toggleClass("expanded");
+			li.find("ul").toggle();			
+		}
     </script>
 
     <nav role="navigation">
@@ -38,25 +44,29 @@
 
             <li class="divider"></li>
 
-			{% for elem in site.pages %}
-				{% if page.url == elem.url %}
-				<li class="chapter active" data-level="1.2" data-path="{{site.baseurl}}{{elem.url}}">
-				{% else %}
-				<li class="chapter" data-level="1.1" data-path="{{site.baseurl}}{{elem.url}}">
-				{% endif %}
-					<a href="{{site.baseurl}}{{elem.url}}" onclick="pageScrollToTop(this)">
-						{{ elem.title | escape }}
-					</a>
-					{% if site.toc.enabled %}
-						{% if page.url == elem.url %}
-							{% include toc.html html=content h_min=site.toc.h_min h_max=site.toc.h_max %}
-						{% endif %}
-					{% endif %}
-				</li>
+			{% for menu in site.data.sidebar.menu %}								
+				{% include sidebar-menu.html data=menu %}
 			{% endfor %}
-			
-			<li class="divider"></li>
 
+			<li class="divider"></li>
         </ul>
+		
+		<script type="text/javascript">
+			if(window.jQuery) {  
+				expand($("li.active").parent("ul"));
+			}
+			else {		
+				if (typeof oldOnload == "undefined") {
+					oldOnload = window.onload;
+				}
+				
+				window.onload = () => {
+					if(oldOnload instanceof Function) {
+						oldOnload();
+					}
+					expand($("li.active").parent("ul"));
+				};
+			}
+		</script>
     </nav>
 </div>

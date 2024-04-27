@@ -1,0 +1,28 @@
+
+{% assign data = include.data | default: {} %}
+
+{% if data.url and page.url==data.url %}
+	{% assign classes = 'active' %}	
+{% else %}	
+	{% assign classes = '' %}	
+{% endif %}
+
+{% if data.url %}
+	<li class="chapter {{classes}}" data-level="1.2" data-path="{{site.baseurl}}{{data.url}}">
+		<a href="{{site.baseurl}}{{data.url}}" onclick="pageScrollToTop(this)">
+			{{ data.title | escape }}
+		</a>
+	</li>
+{% else if data.children %}	
+	<li>
+		<a onclick="expand(this)" style="cursor: pointer;">
+			{{ data.title | escape }}
+			<i class="exc-trigger fa"></i>
+		</a>		
+		<ul style="display: none">	
+			{% for child in data.children %}
+				{% include sidebar-menu.html data=child %}
+			{% endfor %}
+		</ul>
+	</li>	
+{% endif %}

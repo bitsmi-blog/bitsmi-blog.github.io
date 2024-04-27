@@ -35,8 +35,8 @@ kramdown:
   syntax_highlighter: rouge
   syntax_highlighter_opts:
     guess_lang: true
-
-syntax_highlighter_style: colorful
+    
+syntax_highlighter_style: github
 
 markdown_ext: markdown,mkdown,mkdn,mkd,md
 
