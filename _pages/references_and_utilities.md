@@ -9,8 +9,8 @@ layout: post
 
 ### Build Tools
 
-{% assign java_build_tools = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories contains 'build tools'" %}
-{% for post in java_build_tools %}
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories contains 'build tools'" %}
+{% for post in posts %}
 - [**{{post.title}}**]({{post.url}})
 {% endfor %}
   
@@ -19,7 +19,7 @@ layout: post
   
 ### Scripts and Utilities
 
-{% assign system_utilities = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'system' and post.categories contains 'scripts and utilities'" %}
-{% for post in system_utilities %}
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'system' and post.categories contains 'scripts and utilities'" %}
+{% for post in posts %}
 - [**{{post.title}}**]({{post.url}})
 {% endfor %}
