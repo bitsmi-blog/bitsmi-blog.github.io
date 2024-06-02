@@ -60,8 +60,12 @@ destination:      ./_site
 incremental:      false
 regenerate:       true
 
+paginate: 2
+paginate_path: "/page/:num/"
+
 plugins:
   - jekyll-asciidoc
+  - jekyll-paginate
   - jekyll-feed
   - jekyll-readme-index
   - jemoji
