@@ -60,7 +60,7 @@ destination:      ./_site
 incremental:      false
 regenerate:       true
 
-paginate: 2
+paginate: 10
 paginate_path: "/page/:num/"
 
 plugins:
