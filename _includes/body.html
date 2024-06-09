@@ -17,8 +17,12 @@
                     {% else %}
                         <h1 id="{{ page.id }}">{{ site.title | escape }}</h1>
                     {% endif %}
-
-                    {{ content }}
+					
+					{% if page.author %}
+						<p style="font-size: 1.25rem"><em>{{ page.date | date: "%d-%m-%Y" }} - {{page.author}}</em></p>				
+					{% endif %}
+					
+					{{ content }}
 
                     {%- if jekyll.environment != 'dev' and site.disqushandler -%}
                         {%- include disqus.html -%}
