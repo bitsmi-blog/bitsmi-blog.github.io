@@ -1,0 +1,129 @@
+---
+title: OCP 11 / 17 - 1Z0-829
+author: xavsal
+date: 2024-06-16
+layout: post
+---
+
+### Summary
+**UPDATE** - **18th-November-2021** - Comparison of the objectives between **1z0-819** an **1z0-829** exams.
+https://coderanch.com/t/746888/certification/Java-Java
+
+~~Current choice is to do the [1z0-819](https://education.oracle.com/cat%C3%A1logo-de-productos-ouexam-pexam_1z0-819/pexam_1Z0-819) exam or to do the [1z0-829](https://education.oracle.com/cat%C3%A1logo-de-productos-ouexam-pexam_1z0-829/pexam_1Z0-829) exam~~.
+
+### Main Certification [1z0-817](https://education.oracle.com/upgrade-ocp-java-6-7-8-to-java-se-11-developer/pexam_1Z0-817 "1z0-817") topics
+These are the **topics** that this exam covers and that are required to pass the exam:
+- **Java Fundamentals**
+	- **Introduction to Java interfaces**
+	- **Introduction to functional interfaces and lambda expressions**
+		- [Local Variable Type Inference](/java/ocp-11-17/2021-03-21-OCP11-Local_Variable_Type_Inference)
+	- Local Variable Type Inference
+	- **Language Enhancements (Java fundamentals)**
+		- [Final modifier](/java/ocp-11-17/2021-06-02-OCP11-final_modifier)
+		- [Enumerations](/java/ocp-11-17/2021-09-27-OCP11-enumerations)
+		- [Class type](/java/ocp-11-17/2021-10-30-OCP11-creating_nested_classes_I)
+			- [Inner](/java/ocp-11-17/2021-10-30-OCP11-creating_nested_classes_II_inner_class)
+			- [Nested](/java/ocp-11-17/2021-10-30-OCP11-creating_nested_classes_III_nested_class)		
+			- [Local](/java/ocp-11-17/2021-10-30-OCP11-creating_nested_classes_IV_local_class)		
+			- [Anonymous](/java/ocp-11-17/2021-10-30-OCP11-creating_nested_classes_V_anonymous_class)		
+- **Generics and Collections - Java Stream API**
+- **Java Functional Programming**
+	- **Built-in Functional Interfaces**
+	- **Lambda Operations on Streams**
+- **Exceptions, Assertions and Localization**
+	- **Exception Handling**
+	- [Assertions](/java/ocp-11-17/2021-03-13-OCP11-assertions)		
+	- [Localization & Internationalization](/java/ocp-11-17/2022-01-16-OCP11-localization)		
+- **Modular Applications**
+	- [Understanding Modules](/java/ocp-11-17/2021-04-04-OCP11-understanding_modules)
+	- [Migration to a Modular Application](/java/ocp-11-17/2021-08-26-OCP11-migration_to_a_modular_application)
+	- [Services in a Modular Application](/java/ocp-11-17/2021-08-28-OCP11-services_in_modular_application)
+- **Concurrence**
+	- **Parallel Streams**
+- **Java File I/O (NIO.2)**
+
+### Main Certification [1z0-819](https://education.oracle.com/cat%C3%A1logo-de-productos-ouexam-pexam_1z0-819/pexam_1Z0-819) topics
+Taking into account that the **1z0-817** will be removed here are the other chapters related to **1z0-819**:
+- **Annotations**
+	- Purpose and typical annotations usage
+	- Apply annotaions to classes and methods
+	- Describe commonly used annotations in the JDK
+	- Declare custom annotations
+- **I/O**
+	- Read data from and write console and file data using I/O streams
+	- Use I/O Streams to read and write files
+	- Read and write objects by using serialization
+- **JDBC**
+	- Connect to databases using JDBC URLs and DriverManager
+	- Use PreparedStatement to perform CRUD operations
+	- Used PreparedStatement and CallableStatement APIs to perform database operations
+- **Security**
+	- Prevent Denial of Servoce in Java applications
+	- Secure confidential information in Java application
+	- Prevent external attack of the code by limiting Accessibility and Extensibility, properly handling input validation and mutability
+	- Secure constructing sensitive objects
+	- Secure Serialization and Deserialization
+
+### Main Certification [1z0-829](https://education.oracle.com/cat%C3%A1logo-de-productos-ouexam-pexam_1z0-829/pexam_1Z0-829) exam topics
+- **Handing date, time, text, numeric and boolean values**
+	- Use primitives and wrapper classes including Math API, parentheses, type promotion, and casting to evaluate arithmetic and boolean expressions
+	- Manipulate text, including text blocks, using String and StringBuilder classes
+	- Manipulate date, time, duration, period, instant and time-zone objects using Date-Time API
+- **Controlling Program Flow**
+	- Create program flow control constructs including if/else, switch statements and expressions, loops, and break and continue statements
+- **Utilizing Java Object-Oriented Approach**
+	- Declare and instantiate Java objects including nested class objects, and explain the object life-cycle including creation, reassigning references, and garbage collection
+	- Create classes and records, and define and use instance and static fields and methods, constructors, and instance and static initializers
+	- Implement overloading, including var-arg methods
+	- Understand variable scopes, apply encapsulation, and make objects immutable. 
+	- Use local variable type inference, including using it to define lambda parameters
+	- Implement inheritance, including abstract and sealed classes. 
+	- Override methods, including that of an Object class. 
+	- Utilize polymorphism and type casting, and differentiate object type versus reference type. 
+	- Identify object types using instanceof operator and pattern matching
+	- Create and use interfaces, identify functional interfaces, and utilize private, static, and default interface methods
+	- Create and use enumerations with fields, methods and constructors
+- **Handling Exceptions**
+	- Handle exceptions using try/catch/finally, try-with-resources, and multi-catch blocks, including custom exceptions
+- **Working with Arrays and Collections**
+	- Create Java arrays, List, Set, Map and Deque collections, and produce, remove, update, retrieve and sort their elements
+- **Working with Streams and Lambda expressions**
+	- Use Java object and primitive Streams, including lambda expressions implementing functional interfaces, to produce, filter, transform, consume, and sort data
+	- Perform decomposition, concatenation and reduction, and grouping and partitioning on sequential and parallel streams
+- **Package and deploy Java code and use the Java Platform Module System**
+	- Define modules and expose module content including through the use of reflection, and declare module dependencies, define services, providers and consumers
+	- Compile Java code, produce modular and non-modular jars, runtime images, and implement migration using unnamed and automatic modules
+- **Manage concurrent code execution**
+	- Create worker threads using Runnable and Callable, manage the thread lifecycle, including automations provided by different Executor services and concurrent API
+	- Develop thread-safe code, using different locking mechanisms and concurrent API
+	- Process Java collections concurrently and utilise parallel streams.
+- **Use Java I/O API**
+	- Read and write console and file data using I/O Streams
+	- Serialize and de-serialize Java objects
+	- Construct, traverse, create, read, and write Path objects and their properties using java.nio.file API
+- **Access databases using JDBC**
+	- Create connections, create and execute basic, prepared and callable statements, process query results and control transactions using JDBC API
+- **Implement Localization**
+	- Implement localization using locales, resource bundles, parse and format messages, dates, times, and numbers including currency and percentage values
+
+## Recommended books
+#### 1z0-829 exam
+When it was available, we will also use this [book](https://www.amazon.es/Oracle-Certified-Professional-Developer-Study/dp/1119864585/ref=sr_1_1?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&keywords=1z0-829&qid=1637276240&qsid=262-8927793-2155610&sr=8-1&sres=1119864585%2C1119864615%2CB07VWMD2LB%2CB075N8PRMP&srpt=ABIS_BOOK "book") for the **1z0-829** exam and this [one](https://www.amazon.es/dp/1119864615/ref=sr_1_2?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&keywords=1z0-829&qid=1637276240&qsid=262-8927793-2155610&sr=8-2&sres=1119864585%2C1119864615%2CB07VWMD2LB%2CB075N8PRMP&srpt=ABIS_BOOK "one") for the mock tests.
+
+### 1z0-819 exam 
+We want to use this book *OCP Oracle Certified Professional Java SE 11 Developer Complete Study Guide: Exam 1Z0-815 and Exam 1Z0-816*. It can be used also for the *Upgrade Exam 1Z0-817*.
+
+More information by one the author's book can be found [here](https://www.selikoff.net/2019/03/17/my-experience-taking-the-new-java-se-11-programmer-i-1z0-815-exam/)
+
+## Other resources
+
+### Java 17
+- [Official Oracle link for Jdk 17](https://docs.oracle.com/en/java/javase/17/docs/api/index.html)
+- [Release information](https://www.oracle.com/news/announcement/oracle-releases-java-17-2021-09-14/)
+
+### Java 11
+
+- [Official Oracle link for Jdk 11](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
+It is also possible to download the javadoc through  this link [jdk-11.0.6 Doc.](http://bitsmi.com/wp-content/uploads/2020/07/jdk-11.0.6_doc-all.zip)
+  
+- Java 11 features summary with brief examples: https://www.journaldev.com/24601/java-11-features

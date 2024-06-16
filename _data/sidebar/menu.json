@@ -1,7 +1,12 @@
 [
 	{
-		"title": "References & Utilities",
-		"url": "/pages/references_and_utilities/"
+		"title": "Java",
+		"children": [
+			{
+				"title": "OCP17 - 1z0-829",
+				"url": "/pages/java/ocp-17/"
+			}
+		]
 	},
 	{
 		"title": "Projects",
@@ -11,5 +16,9 @@
 				"url": "/pages/projects/kumo/"
 			}
 		]
+	},
+	{
+		"title": "References & Utilities",
+		"url": "/pages/references_and_utilities/"
 	}
 ]
