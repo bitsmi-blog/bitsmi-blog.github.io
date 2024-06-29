@@ -278,5 +278,4 @@ Where:
 * [Modules example on Bitbucket][plain-example]
 
 [//]: # (Links)
-[plain-example]:https://bitbucket.org/bitsmi/ocp11/src/master/appendix-a/plain-project/
-
+[plain-example]:https://bitbucket.org/bitsmi/ocp11/src/master/appendix-a/modules/plain-project/

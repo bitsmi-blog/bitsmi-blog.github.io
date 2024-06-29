@@ -1,0 +1,697 @@
+---
+author: Antonio Archilla
+title: Spring Dependency Injection
+date: 2024-06-29
+categories: [ "spring" ]
+layout: post
+excerpt_separator: <!--more-->
+---
+
+:toc:
+
+**Spring Dependency Injection** capabilities allow us to manage bean bindings in different ways. Here is a basic guide on how to:
+
+* Having a single bean candidate and a single injection point, that is the base case when we define
+a bean and use `@Autowired` annotation to inject it
+* Having multiple bean candidates of the same type and a single injection point. Here we can define
+a default bean or use identifiers to select which one will be injected
+* Having zero bean candidates for a type and a single injection point, which means that we can have
+optional beans
+* Having multiple bean candidates of the same type and a multiple injection point, allowing accessing
+all beans for the specified type in the same injection point
+* Having conditional bean candidates that are only available when a condition is met
+* Create and inject prototype scoped beans
+
+// <!--more-->
+
+== Optional and multiple bindings
+
+=== Primary bean
+
+We can use **Spring**'s `@Primary` annotation to mark a specific bean to be the default candidate
+to be injected in single injection points.
+
+**Definition**:
+[source,java]
+----
+@Service
+@Primary
+public class MainProductServiceImpl implements ProductService
+{
+    // . . .
+}
+----
+
+**Injection (Field)**:
+[source,java]
+----
+@Service
+public class Store
+{
+    @Autowired
+    private ProductService defaultProductService;
+
+    // . . .
+}
+----
+
+**Injection (Constructor)**:
+[source,java]
+----
+@Service
+public class Store
+{
+    private final ProductService productService;
+
+    public Store(ProductService productService) {
+        this.productService = productService;
+    }
+
+    // . . .
+}
+----
+
+=== Qualifiers
+
+Individual beans for a same type are still available if we use the `@Qualifier` annotation.
+In that case, we need to specify an identifier for the individual bean and use it at definition
+and injection points.
+
+**Definition**:
+[source,java]
+----
+@Service
+@Qualifier("ADDITIONAL_PRODUCT")
+public class AdditionalProductServiceImpl implements ProductService
+{
+    // . . .
+}
+
+----
+
+**Injection (Field)**:
+[source,java]
+----
+@Service
+public class Store
+{
+    @Autowired
+    @Qualifier("ADDITIONAL_PRODUCT")
+    private ProductService additionalProductService;
+
+    // . . .
+}
+----
+
+**Injection (Constructor)**:
+[source,java]
+----
+@Service
+public class Store
+{
+    private final ProductService additionalProductService;
+
+    public Store(@Qualifier("ADDITIONAL_PRODUCT") ProductService additionalProductService) {
+        this.additionalProductService = additionalProductService;
+    }
+
+    // . . .
+}
+----
+
+=== Injecting `Optional`, `List` and `ObjectProvider`
+
+In case we have no bean candidates for a type, it is required to use the `required = false` flag in `@Autowired` annotation
+
+**Injection (Field)**:
+[source,java]
+----
+@Service
+public class Store
+{
+    @Autowired(required = false)
+    private ProductService defaultProductService;
+
+    // . . .
+}
+----
+
+**Injection (Constructor)**:
+[source,java]
+----
+@Service
+public class Store
+{
+    private final ProductService productService;
+
+    public Store(@Autowired(required = false) ProductService productService) {
+        this.productService = productService;
+    }
+
+    // . . .
+}
+----
+
+In that case the bean instance will be `null` at runtime. We have to handle this every time that we want to use it in the code.
+Alternatively, we can wrap the bean instance with an `Optional` or `ObjectProvider` so we can handle easily the `null` case:
+
+**Injection of an Optional**:
+[source,java]
+----
+@Service
+public class Store
+{
+    @Autowired
+    private Optional<ProductService> productService;
+
+    // . . .
+
+    public Optional<String> getProductName() {
+        return productService
+                .map(ProductService::getProductName);
+    }
+}
+----
+
+**Injection of an ObjectProvider**:
+[source,java]
+----
+@Service
+public class Store
+{
+    @Autowired
+    private ObjectProvider<ProductService> productService;
+
+    // . . .
+
+    public Optional<String> getProductName() {
+        return productService.stream()
+            .findAny()
+            .map(ProductService::getProductName);
+    }
+}
+----
+
+We can also use `ObjectProvider` and a `Collection` when we have multiple beans of the same type:
+
+**Injection of an ObjectProvider**:
+[source,java]
+----
+@Service
+public class Store
+{
+    @Autowired
+    private ObjectProvider<ProductService> productService;
+
+    // . . .
+
+    public List<String> getProductNames() {
+        return productService.stream()
+            .map(ProductService::getProductName)
+            .toList();
+    }
+}
+----
+
+**Injection of a List**:
+[source,java]
+----
+@Service
+public class Store
+{
+    @Autowired
+    private List<ProductService> productService;
+
+    // . . .
+
+    public List<String> getProductNames() {
+        return productService.stream()
+            .map(ProductService::getProductName)
+            .toList();
+    }
+}
+----
+
+== Conditional binding
+
+Using conditional binding allow us to create a bean instance only if a condition is met. We can add a condition to any bean defined with a stereotype annotation (`@Component`, `@Service`, `@Repository`, `@Controller`), a `@Configuration` or a `@Bean` creation.
+
+**Spring-boot** provides many built-in conditions such as:
+
+* **Conditional on profile**
++
+Beans annotated with `@Profile("<PROFILE_NAME>")` will only be available if the specified Spring profile is active.
++
+[source,java]
+----
+@Service
+@Profile("profile1")
+public class StoreService {
+  // . . .
+}
+----
++
+`@Profile` annotation accepts also an expression involving multiple profiles and logical operations AND (`&`), OR (`|`) and NOT (`!`)
++
+[source,java]
+----
+@Service
+@Profile("!profile1 & (profile2 | profile3)")
+public class StoreService {
+  // . . .
+}
+----
++
+Or an array of multiple profiles, resolved as a logical AND between the specified values
++
+[source,java]
+----
+@Service
+@Profile({ "profile1", "profile2" })
+public class StoreService {
+  // . . .
+}
+----
+
+* **Conditional on property**
++
+`@ConditionalOnProperty` annotation allows to load beans conditionally depending on a certain environment property
++
+[source,java]
+----
+@Service
+@ConditionalOnProperty(
+    value = "store.service.enabled"
+)
+public class StoreService {
+  // . . .
+}
+----
+
+* **Conditional on expression**
++
+If we have a logical expression involving more than one property, we can use `@ConditionalOnExpression` annotation instead of @ConditionalOnProperty` and use **Spring Expression Language** (SpEL) to write the condition
++
+[source,java]
+----
+@Service
+@ConditionalOnExpression(
+    "${store.module.enabled:true} and ${store.service.enabled:true}"
+)
+public class StoreService {
+  // . . .
+}
+----
++
+In that example, condition will evaluate to true if both `some.module.enabled` and `some.service.enabled` properties are `true`, taking `true` as default value if the property is not present.
+
+* **Conditional on bean or on a missing bean**
++
+`@ConditionalOnBean` annotation allows to load beans conditionally depending on the presence of a specific bean in the context
++
+[source,java]
+----
+@Service
+@ConditionalOnBean(ProductService.class)
+public class ProductStoreService {
+  // . . .
+}
+----
++
+Alternatively we can use `@ConditionalOnMissingBean` to load when the required bean is missing
++
+[source,java]
+----
+@Service
+@ConditionalOnMissingBean(ProductService.class)
+public class EmptyStoreService {
+  // . . .
+}
+----
++
+Both annotations accept more than 1 bean. All specified beans must (not)exists so that the condition resolves to `true`
+
+* **Conditional on class or on a missing class**
++
+`@ConditionalOnClass` annotation allows to load beans conditionally depending on the presence of a specific class in classpath
++
+[source,java]
+----
+@Service
+@ConditionalOnClass("com.bitsmi.store.ProductService")
+public class ProductStoreService {
+  // . . .
+}
+----
++
+Alternatively we can use `@ConditionalOnMissingClass` to load when the required class is missing
++
+[source,java]
+----
+@Service
+@ConditionalOnMissingClass("com.bitsmi.store.ProductService")
+public class EmptyStoreService {
+  // . . .
+}
+----
++
+Both annotations accept more than 1 class. All specified classes must (not)exists so that the condition resolves to `true`
+
+* **Conditional on resource**
++
+`@ConditionalOnResource` annotation allows to load beans conditionally depending on the presence of a specific resource on classpath
++
+[source,java]
+----
+@Service
+@ConditionalOnResource(
+    "logback.xml"
+)
+public class LogbackService {
+  // . . .
+}
+----
+
+* **Conditional on Java version**
++
+`@ConditionalOnJava` annotation allows to load beans conditionally only if running a certain version of Java
++
+[source,java]
+----
+import org.springframework.boot.system.JavaVersion;
+
+@Service
+@ConditionalOnJava(JavaVersion.SEVENTEEN)
+public class StoreServiceJava17Impl {
+  // . . .
+}
+----
+
+=== Custom conditions
+
+In addition to **Spring**'s built-in conditions, we can create our own ones implementing `Condition` interface:
+
+[source,java]
+----
+import org.apache.commons.lang3.SystemUtils;
+
+class OnUnixCondition implements Condition {
+
+    @Override
+    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+  	  return SystemUtils.IS_OS_LINUX;
+    }
+}
+----
+
+[source,java]
+----
+// . . .
+@Bean
+@Conditional(OnUnixCondition.class)
+UnixService unixService() {
+  return new UnixService();
+}
+// . . .
+----
+
+In case of be necessary, we can create an annotation to provide additional data that will take part in the resolution of condition. We will know these annotations as `@ConditionalOn...`
+
+[source,java]
+----
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Conditional(OnSystemNameCondition.class)
+public @interface ConditionalOnSystemName {
+    String[] value();
+}
+----
+
+[source,java]
+----
+import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.util.MultiValueMap;
+
+class OnSystemNameCondition implements Condition {
+
+    @Override
+    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        boolean matches = false;
+
+  	    MultiValueMap<String, Object> attrs = metadata.getAllAnnotationAttributes(ConditionalOnSystemName.class.getName());
+		if (attrs != null) {
+            // Annotation attribute values
+            String[] osNames = (String[])attrs.get("value");
+
+            matches = isAcceptedOs(osNames);
+		}
+		return matches;
+    }
+
+    // . . .
+}
+----
+
+[source,java]
+----
+@Service
+@ConditionalOnSystemName({ "Windows", "Linux" })
+public class SystemDependantService {
+    // . . .
+}
+----
+
+=== Combining conditions
+
+We can specify multiple conditions that will be evaluated in order to resolve if the bean will be available.
+
+If we want to achieve an `OR` logic, we will have to create a new condition that extends `AnyNestedCondition` and wraps individual conditions as nested classes
+
+[source,java]
+----
+class OnTestOrDevProfileCondition extends AnyNestedCondition {
+
+  OnTestOrDevCondition() {
+    super(ConfigurationPhase.REGISTER_BEAN);
+  }
+
+  @Profile("DEV")
+  static class OnDev {}
+
+  @Profile("Test")
+  static class OnTest {}
+}
+----
+
+[source,java]
+----
+@Service
+@Conditional(OnTestOrDevProfileCondition.class)
+public class DevOrTestService {
+    // . . .
+}
+----
+
+The same approach can be followed to create a custom annotation combining multiple conditions in a single `@ConditionalOn...` annotation using `AND` logic, extending `AllNestedConditions` class, or a `NONE` logic extending `NoneNestedCondition` class.
+
+**AND combined conditions**
+
+[source,java]
+----
+class OnTestingJava17Condition extends AllNestedCondition {
+
+  OnTestingJava8Condition() {
+    super(ConfigurationPhase.REGISTER_BEAN);
+  }
+
+  @Profile("TEST")
+  static class OnTest {}
+
+  @ConditionalOnJava(JavaVersion.SEVENTEEN)
+  static class OnJava17 {}
+}
+----
+
+[source,java]
+----
+@Service
+@Conditional(OnTestingJava17Condition.class)
+public class Java17TestService {
+    // . . .
+}
+----
+
+**NONE combined conditions**
+
+[source,java]
+----
+class OnUnsupportedJavaVersionCondition extends NoneNestedCondition {
+
+  OnUnsupportedJavaVersionCondition() {
+    super(ConfigurationPhase.REGISTER_BEAN);
+  }
+
+  @ConditionalOnJava(JavaVersion.SEVENTEEN)
+  static class OnJava17 {}
+
+  @ConditionalOnJava(JavaVersion.TWENTY_ONE)
+  static class OnJava21 {}
+}
+----
+
+[source,java]
+----
+@Service
+@Conditional(OnUnsupportedJavaVersionCondition.class)
+public class UnsupportedJavaVersionTestService {
+    // . . .
+}
+----
+
+By default, if we add multiple `@ConditionalOn...` annotations to a bean, they will be combined using `AND` logic
+
+[NOTE]
+====
+As `@Conditional` annotation cannot be specified multiple types in a class / method, we only use custom `@ConditionalOn...` annotations
+to achieve this (or one `@Conditional` plus other `@ConditionalOn...` for each additional condition)
+====
+
+== Prototype scoped beans
+
+**Spring context** allows us to get unique instances of the same bean every time we ask for it
+when they are scoped as **prototype beans**.
+
+This scope is specified using `@Scope(BeanDefinition.SCOPE_PROTOTYPE)` in the bean definition along with
+`@Service`, `@Component`, `@Bean`, `@Repository` annotations in bean definition:
+
+[source,java]
+----
+@Service
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+public class PrototypeServiceImpl implements PrototypeService {
+    // . . .
+}
+----
+
+[source,java]
+----
+@Configuration
+public class ServiceConfig
+{
+    @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public PrototypeService simplePrototypeService()
+    {
+        return new PrototypeServiceImpl();
+    }
+}
+----
+
+We can obtain an instance of them in multiple ways:
+
+* Using `@Autowired` annotation. This will inject a unique instance that will not be shared in other injection points.
++
+This example code injects instances of the same type for a prototype bean. As prototype beans are not shared
+across multiple injections points, the injected services are different instances.
++
+[source,java]
+----
+@Service
+class ExampleService {
+    @Autowired
+    private PrototypeService serviceInstance1;
+    @Autowired
+    private PrototypeService serviceInstance2;
+}
+----
+
+* Using `ObjectProvider`. We will obtain a new instance every time we call `getObject` method. E.G:
++
+[source,java]
+----
+import org.springframework.beans.factory.ObjectProvider;
+
+@Service
+class ExampleService {
+    @Autowired
+    private ObjectProvider<PrototypeService> prototypeServices;
+
+    public void doSomething() {
+        final PrototypeService instance = prototypeServices.getObject();
+        // . . .
+    }
+}
+----
+
+* Directly from **Spring**'s `ApplicationContext`, every time we call `getBean()` method. E.G:
++
+[source,java]
+----
+import org.springframework.context.ApplicationContext;
+
+@Service
+class ExampleService {
+    @Autowired
+    private ObjectProvider<PrototypeService> prototypeServices;
+
+    public void doSomething() {
+        final PrototypeService instance = applicationContext.getBean(PrototypeService.class);
+        // . . .
+    }
+}
+----
+
+* Using a custom **factory**. This also allows to parameterize bean creation:
++
+[source,java]
+----
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
+
+@Configuration
+public class ParameterizedServicePrototypeFactory
+{
+    @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public ParameterizedService get(String parameter)
+    {
+        return new ParameterizedServiceImpl(parameter);
+    }
+}
+----
++
+[source,java]
+----
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
+
+@Service
+class ExampleService {
+    @Autowired
+    private ParameterizedServicePrototypeFactory serviceFactory;
+
+    public void doSomething() {
+        final ParameterizedService actualInstance1 = parameterizedServicePrototypeFactory.get("A_PARAMETER");
+        // . . .
+    }
+}
+----
++
+In this case we will not mark bean implementation with any stereotype like `@Service`, `@Component`, etc.
+as the factory is in charge of create the bean:
++
+[source,java]
+----
+public class ParameterizedServiceImpl implements ParameterizedService {
+    private final String name;
+
+    public ParameterizedServiceImpl(String name) {
+        this.name = name;
+    }
+
+    // . . .
+}
+----
