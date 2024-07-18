@@ -1,8 +1,8 @@
 ---
 author: Antonio Archilla
-title: Spring Dependency Injection
+title: Introduction
 date: 2024-06-29
-categories: [ "spring" ]
+categories: [ "spring", "dependency injection" ]
 layout: post
 excerpt_separator: <!--more-->
 ---

@@ -40,6 +40,12 @@ syntax_highlighter_style: github
 
 markdown_ext: markdown,mkdown,mkdn,mkd,md
 
+asciidoctor:
+  attributes:
+    idprefix: _
+    source-highlighter: rouge    
+    rouge-style: github
+
 # Permalinks
 permalink: /:categories/:year-:month-:day-:title:output_ext
 

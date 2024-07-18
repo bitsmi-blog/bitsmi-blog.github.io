@@ -23,6 +23,11 @@
 	},
 	{
 		"title": "Spring",
-		"url": "/pages/spring/"
+		"children": [
+			{
+				"title": "Dependency Injection",
+				"url": "/pages/spring/dependency_injection/"
+			}
+		]
 	}
 ]
