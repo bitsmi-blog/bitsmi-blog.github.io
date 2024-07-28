@@ -5,6 +5,17 @@ date: 2024-04-21
 layout: post
 ---
 
+## Database
+
+### Oracle
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'database' and post.categories contains 'oracle'" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
+
+[//]: #---------------------------
+
 ## DevOps
 
 ### Monitoring
@@ -13,6 +24,8 @@ layout: post
 {% for post in posts %}
 - [{{post.title}}]({{post.url}})
 {% endfor %}
+
+[//]: #---------------------------
 
 ## Java
 
@@ -30,6 +43,8 @@ layout: post
 - [{{post.title}}]({{post.url}})
 {% endfor %}
   
+[//]: #---------------------------
+  
 ## SCM
   
 ### Scripts and Utilities
@@ -38,6 +53,8 @@ layout: post
 {% for post in posts %}
 - [{{post.title}}]({{post.url}})
 {% endfor %}
+
+[//]: #---------------------------
   
 ## System
   
@@ -47,6 +64,8 @@ layout: post
 {% for post in posts %}
 - [{{post.title}}]({{post.url}})
 {% endfor %}
+
+[//]: #---------------------------
 
 ## Virtualization
 
@@ -63,3 +82,5 @@ layout: post
 {% for post in posts %}
 - [{{post.title}}]({{post.url}})
 {% endfor %}
+
+[//]: #---------------------------

@@ -1,0 +1,95 @@
+---
+author: xavsal
+title: Ejecución de Maven des de consola de comandos MS-DOS
+date: 2014-07-23
+categories: [ "references", "java", "build tools" ]
+tags: [ "java", "maven" ]
+layout: post
+excerpt_separator: <!--more-->
+---
+
+:script: https://github.com/xavsal35/Scripting/blob/master/MSDos-Maven.bat
+:maven-war-plugin: http://maven.apache.org/plugins/maven-war-plugin/
+
+== Caso de Ejemplo: 
+
+Se dispone de un proyecto multi-módulo del que se desean desplegar varios de sus módulos.
+Se dispone de Maven en su versión 2.2 y de un servidor Weblogic 9.2 Mp4 para los módulos J2EE de las aplicaciones.
+Para automatizar los despliegues de dichos módulos sin necesidad de acceder ni recorrer el árbol de directorios mediante la consola de comandos DOS del Windows 7 se ha creado el siguiente {script}[script].
+Este script ejecuta los despliegues de cada  uno de los módulos que forman el proyecto J2EE en la carpeta establecida como ruta de despliegue para el servidor Weblogic en el fichero de configuración de Maven.
+
+Además, informa de los nombres de los módulos y de los tiempos en que se ejecuta cada uno de los despliegues y lo almacena todo en un fichero llamado `resultado.txt`, que puede consultarse con posterioridad.
+
+Una vez realizadas todas las tareas se publica en el fichero un mensaje de finalización de éxito:
+
+[source,sh]
+----
+echo =================================================
+echo TODOS LOS MODULOS HA SIDO DESPLEGADOS CON EXITO  
+echo =================================================
+----
+
+== Detalle: 
+
+A continuación se detalla una sección del código fuente del fichero `.bat` explicando un poco su funcionalidad.
+
+La sección más importante del script es la siguiente:
+
+[source,sh]
+----
+ECHO __________>>resultado.txt.
+echo Modulo ST >>resultado.txt.  <1>
+time /t>>resultado.txt. <2> 
+ECHO __________>>resultado.txt. 
+call mvn package war:exploded -f<Ruta_ubicación_fichero_pom>pomITT.xml>>resultado.txt. <3> 
+if not %ERRORLEVEL% == 0 exit /b. <4>
+time /t>>resultado.txt <5>
+----
+<1> Título  del módulo
+<2> Se indica el inicio del tiempo de despliegue
+<3> Se llama al maven  mediante la instrucción call de DOS para ejecutar el despliegue del módulo actual
+<4> En caso de error salimos de la consola de comandos
+<5> Se indica el final del tiempo de despliegue y se escribe la salida de pantalla al fichero de texto de resultado.txt
+
+Se sobreentiende que el fichero `pom.xml` de cada uno de los módulos o proyectos J2EE ya incluye en su  sección de despliegue la ruta correcta para el servidor Weblogic (En todo caso debe indicarse cuál es la ruta correcta para realizar los despliegues pertinentes).
+
+== Actualización del 20/01/2015
+
+En lugar de escribir directamente la ruta de cada uno de los ficheros se utiliza el paso de parámetros en el script. En lugar de utilizar esta línea de código:
+
+[source,sh]
+----
+call mvn package war:exploded -f<Ruta_ubicación_fichero_pom>pomITT.xml>>resultado.txt 
+----
+
+se modifica esta llamada por esta otra línea de código:
+
+[source,sh]
+----
+call mvn install -f%1<nombre_del proyecto>pom.xml>>resultado.txt
+---- 
+
+El `%1` permite recuperar la ruta en la que se encuentran los proyectos en desarrollo accediendo al fichero POM pasando dicha ruta como parámetro al script. Puede utilizarse cualquier ruta o directorio siempre que el directorio disponga de fichero `pom.xml` con una configuración **Maven**, sino el script dará un error.
+
+Este cambio por un lado nos permite ejectuar la llamada de **Maven** en todos los proyectos indistintamente de su ubicación dentro del sistema de archivos dado que la carpeta contenedora siempre se pasa por parámetro.
+La configuración de Maven (dentro de la etiqueta `<build><plugin>`) dentro del fichero POM es la siguiente:
+
+[source,xml]
+----
+<plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-war-plugin</artifactId>
+	<configuration>
+		<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+		<attachClasses>true</attachClasses>
+		<classesClassifier>classes</classesClassifier>
+		<encoding>ISO-8859-1</encoding>
+		<webappDirectory>C:/Weblogic_Despliegues/${project.artifactId}</webappDirectory>
+	</configuration>
+</plugin>
+----
+
+El script de ejecución puede encontrarse en este {script}[enlace].
+
+Para un mayor detalle sobre el plugin de `maven-war-plugin` se puede encontrar información detallada en este {maven-war-plugin}[enlace].
+
