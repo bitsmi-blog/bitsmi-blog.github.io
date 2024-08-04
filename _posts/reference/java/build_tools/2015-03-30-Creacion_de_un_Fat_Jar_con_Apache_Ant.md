@@ -16,7 +16,8 @@ Esto hace que para especificar el classpath de la aplicación sea necesario:
 Especificar directamente en el archivo `MANIFEST.MF` de forma individual todos las dependéncias que forman el classpath mediante la propiedad Class-Path de la siguiente manera
 `Class-Path: lib/jar1.jar lib/jar2.jar lib/jar3.jar`
 
-Especificar en la orden de ejecución Java las dependéncias a través del parámetro cp
+Especificar en la orden de ejecución Java las dependéncias a través del parámetro `cp`
+
 En **Windows**: `java -cp "lib/jar1.jar;lib/jar2.jar;lib/jar3.jar" -jar jar_principal`
 
 En **Unix**: `java -cp "lib/jar1.jar:lib/jar2.jar:lib/jar3.jar" -jar jar_principal`

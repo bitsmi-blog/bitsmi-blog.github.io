@@ -36,6 +36,13 @@ layout: post
 - [{{post.title}}]({{post.url}})
 {% endfor %}
 
+### Error Reference
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories contains 'error reference'" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
+
 ### JVM
 
 {% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories contains 'jvm'" %}
