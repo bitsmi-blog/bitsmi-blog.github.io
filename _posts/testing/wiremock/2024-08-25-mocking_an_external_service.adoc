@@ -1,0 +1,187 @@
+---
+author: Antonio Archilla
+title: Mocking external services with Wiremock
+date: 2024-08-25
+categories: [ "testing", "wiremock" ]
+tags: [ "wiremock" ]
+layout: post
+excerpt_separator: <!--more-->
+---
+
+If we need to mock an external service during application development, we can configure a **Wiremock container**
+as part of the `docker-compose-DEV.yaml` service stack:
+
+// <!--more-->
+
+[source,yaml]
+----
+# . . .
+services:
+  # . . .
+  wiremock:
+    container_name: wiremock
+    image: "wiremock/wiremock:3.4.2-1"
+    ports:
+      - 8100:8080
+    entrypoint: [ "/docker-entrypoint.sh", "--global-response-templating", "--disable-gzip", "--verbose" ]
+    volumes:
+      - ./wiremock/extensions:/var/wiremock/extensions
+      - ./wiremock/__files:/home/wiremock/__files
+      - ./wiremock/mappings:/home/wiremock/mappings
+
+----
+
+This configuration allow us to access mock server through port `8100`. The specified `volumes` configuration
+make possible to load mock expectations at startup:
+
+* **extensions**: Folder that will contain additional **Wiremock** extensions, for example, to allow processing **gRPC** or **GraphQL** messaging.
+* **__files**: Folder that will contain files that will be served directly as a kind of `public` folder.
+This is useful for referencing content files inside `expectation configuration` files.
+* **mappings**: Folder that will contain `expectation configuration` files in form of `json` files.
+
+== Expectations configuration
+
+Every `expectation configuration` file will contain a `single` expectation configured as follows:
+
+[source,json]
+----
+{
+    "priority": 10,
+    "request": {
+
+    },
+    "response": {
+
+    }
+}
+----
+
+* **priority**: A number indicating the priority of this configuration when a request matches multiple expectations.
+The one with a lower priority wins.
+* **request**: Request matcher configuration for the expectation
+* **response**: Configuration of the response that will be returned if the expectation is selected.
+
+=== Request matcher
+
+The `request` section of the `expectation configuration` allows the specification of multiple matchers that determines if
+a request is selectable for this expectation, including:
+
+* **method**: HTTP method (GET, POST, PUT, DELETE, PATCH)
+* **urlPath**: Path without query parameters
+* **url**: Full url with including query parameters
+* **queryParameters**: Matchers for individual query parameters. Parameter values can be matched using a series of matchers including:
+** Match exactly (`equalsTo`),
+** Using a regular expressions (`matches`)
+** Containing a value (`contains`)
+
+=== Response configuration
+
+The response that will be returned as the result of the matching expectation can be configured with the following information:
+
+* **status**: HTTP status code for the response
+* **headers**: Map containing the headers carried by the response
+* **body**: Plain text data that will be returned as response body
+* **jsonBody**: JSON data that will be returned as response body
+* **bodyFileName**: Path relative to `__files` folder containing the raw content of response body
+
+=== Example
+
+The following example matches a request to the `/api/inventory` endpoint that provides `selector`, `page` and `pageSize` query parameters
+that matches exactly the specified values. A response with status code `200` and a JSON body will bre returned.
+The content of this response is located in `api/inventory/get_list_body.json` file located in the `__files` folder.
+
+[source,json]
+----
+{
+    "priority": 10,
+    "request": {
+        "method": "GET",
+        "urlPath": "/api/inventory",
+        "queryParameters": {
+            "selector": {
+                "equalTo": "id EQUALS 1"
+            },
+            "page": {
+                "equalTo": "0"
+            },
+            "pageSize": {
+                "equalTo": "10"
+            }
+        }
+    },
+    "response": {
+        "status": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "bodyFileName": "api/inventory/get_list_body.json"
+    }
+}
+----
+
+== Wiremock Admin API
+
+Once the service is started, we can manage expectations using Wiremock's Admin API as follows:
+
+**Get all defined expectations**
+[source,bash]
+----
+curl http://localhost:8100/__admin/mappings
+----
+
+**Create a new expectation using the API**
+[source,bash]
+----
+curl -X POST -H "Content-Type: application/json" -d '
+{
+    "id": "12345678-1234-1234-1234-123456789012",
+	"priority": 10,
+	"request": {
+		"method": "GET",
+		"url": "/api/sample"
+	},
+	"response": {
+		"status": 200,
+		"headers": {
+			"Content-Type": "application/json"
+		},
+		"bodyFileName": "api/sample/get_sample_body.json"
+	}
+}
+' http://localhost:8100/__admin/mappings
+----
+
+**Update an existing expectation using the API**
+[source,bash]
+----
+curl -X PUT -H "Content-Type: application/json" -d '
+{
+	"priority": 10,
+	"request": {
+		"method": "GET",
+		"url": "/api/sample"
+	},
+	"response": {
+		"status": 200,
+		"headers": {
+			"Content-Type": "application/json"
+		},
+		"jsonBody": [1, 2, 3, 4]
+	}
+}
+' http://localhost:8100/__admin/mappings/12345678-1234-1234-1234-123456789012
+----
+
+**Reload expectations from /mappings files**
+
+NOTE: This option makes possible to modify expectations editing mappings files directly and then reload Wiremock state
+
+[source,bash]
+----
+curl -X POST http://localhost:8100/__admin/mappings/reset
+----
+
+== References
+
+* https://wiremock.org/docs/[Wiremock reference documentation]
+

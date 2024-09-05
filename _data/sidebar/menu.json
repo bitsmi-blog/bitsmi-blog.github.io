@@ -29,5 +29,14 @@
 				"url": "/pages/spring/dependency_injection/"
 			}
 		]
-	}
+	},
+	{
+		"title": "Testing",
+		"children": [
+			{
+				"title": "Wiremock",
+				"url": "/pages/testing/wiremock/"
+			}
+		]
+	}	
 ]
