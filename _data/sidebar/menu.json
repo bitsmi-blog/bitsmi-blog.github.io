@@ -3,6 +3,10 @@
 		"title": "Java",
 		"children": [
 			{
+				"title": "OCP7 – 1z0-805",
+				"url": "/pages/java/ocp-7/"
+			},
+			{
 				"title": "OCP17 - 1z0-829",
 				"url": "/pages/java/ocp-17/"
 			}

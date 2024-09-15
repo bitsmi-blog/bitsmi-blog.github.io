@@ -36,15 +36,6 @@ layout: post
 - [{{post.title}}]({{post.url}})
 {% endfor %}
 
-## Javascript
-
-### ECMA Script
-
-{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'javascript' and post.categories contains 'ECMA-script'" %}
-{% for post in posts %}
-- [{{post.title}}]({{post.url}})
-{% endfor %}
-
 ### Error Reference
 
 {% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories contains 'error reference'" %}
@@ -55,6 +46,24 @@ layout: post
 ### JVM
 
 {% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories contains 'jvm'" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
+
+### Persistence
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories contains 'persistence'" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
+
+[//]: #---------------------------
+
+## Javascript
+
+### ECMA Script
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'javascript' and post.categories contains 'ECMA-script'" %}
 {% for post in posts %}
 - [{{post.title}}]({{post.url}})
 {% endfor %}
