@@ -9,8 +9,8 @@ layout: home
                     
 {% for post in sorted_posts reversed %}
 	<h2 id="multi-release-jars"><a href="{{post.url}}">{{post.title}}</a></h2>
-	<p style="font-size: 1.25rem"><em>{{ post.date | date: "%d-%m-%Y" }} - {{post.author}}</em></p>
-
+	<h5>{{ post.date | date: "%d-%m-%Y" }} - {{post.author}}</h5>
+	
 	{{post.excerpt}}
 	
 	<p><a href="{{post.url}}">more…</a></p>
