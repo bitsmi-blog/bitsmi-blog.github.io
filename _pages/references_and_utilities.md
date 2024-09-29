@@ -50,6 +50,13 @@ layout: post
 - [{{post.title}}]({{post.url}})
 {% endfor %}
 
+### Libraries
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories contains 'libraries'" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
+
 ### Persistence
 
 {% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories contains 'persistence'" %}

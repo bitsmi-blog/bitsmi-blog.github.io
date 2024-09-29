@@ -42,6 +42,10 @@
 		"title": "Testing",
 		"children": [
 			{
+				"title": "JUnit",
+				"url": "/pages/testing/junit/"
+			},
+			{
 				"title": "Wiremock",
 				"url": "/pages/testing/wiremock/"
 			}
