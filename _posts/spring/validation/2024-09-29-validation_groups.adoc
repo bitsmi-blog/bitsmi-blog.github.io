@@ -1,0 +1,152 @@
+---
+author: Antonio Archilla
+title: Validation groups
+date: 2024-09-29
+categories: [ "spring", "validation" ]
+layout: post
+excerpt_separator: <!--more-->
+---
+
+`jakarta.validation.groups` allow us to configure the constraints to be validated depending on the context. 
+For example, in some situations may have sense only to validate certain constraints when a domain entity is being created (not managed) 
+and not when is updated (managed), the ID and creation / update timestamps for example.
+In that case we can define the constraints that will be executed in each case using different groups
+
+// <!--more-->
+
+[source,java]
+----
+public record Schema(
+        @Null(groups = { NotManaged.class })
+        @NotNull(groups = { Managed.class })
+        Long id,
+        @NotNull
+        String externalId,
+        @NotNull
+        String name,
+        @Null(groups = { NotManaged.class })
+        @NotNull(groups = { Managed.class })
+        LocalDateTime creationDate,
+        @Null(groups = { NotManaged.class })
+        @NotNull(groups = { Managed.class })
+        LocalDateTime lastUpdated
+) {
+    // . . .
+}
+----
+
+In this example, the `ID` and `creation` / `updated` timestamps attributes will be forced to be *null* only when the object
+is not managed by the application. Any constraint not assigned explicitly to any group will be assigned to the *default* group.
+
+Custom *validation groups* can be defined as interfaces as following:
+
+[source,java]
+----
+public final class CommonValidationGroups {
+
+    private CommonValidationGroups() { }
+
+    public interface NotManaged { }
+    public interface Managed { }
+}
+----
+
+Then, when we configure a validation for an object, using the `Validator` object directly or
+using Spring's `@Validated` annotation, we can specify one or more validation groups to be evaluated.
+
+[source,java]
+----
+import jakarta.validation.groups.Default;
+
+@Validated({ Default.class, NotManaged.class })
+public Schema createSchema(@Valid Schema schema) {
+    // . . .
+}
+
+@Validated({ Default.class, Managed.class })
+public Schema updateSchema(@Valid Schema schema) {
+    // . . .
+}
+----
+
+[source,java]
+----
+import jakarta.validation.groups.Default;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+
+// . . .
+
+final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+final Schema schema = // . . .
+Set<ConstraintViolation<Schema>> constraintViolations = validator.validate(providedStore, Default.class, CommonValidationGroups.Managed.class);
+----
+
+We have to specify the `jakarta.validation.groups.Default` so the validations not assigned explicitly to
+any group are executed (E.G. the `@NotNull` constraint on `externalId` and `name` fields).
+
+We can also extend from `jakarta.validation.groups.Default` to automatically apply default groups constraints
+when we execute the validation only specifying our custom validation groups, although doing this we will lose the
+possibility to individually evaluate these custom groups, as always will also evaluate default group constraints.
+
+[source,java]
+----
+import jakarta.validation.groups.Default;
+
+public final class CommonValidationGroups {
+
+    private CommonValidationGroups() { }
+
+    public interface NotManaged extends Default { }
+    public interface Managed extends Default { }
+}
+----
+
+[source,java]
+----
+import jakarta.validation.groups.Default;
+
+@Validated({ NotManaged.class })
+public Schema createSchema(@Valid Schema schema) {
+    // . . .
+}
+
+@Validated({ Managed.class })
+public Schema updateSchema(@Valid Schema schema) {
+    // . . .
+}
+----
+
+[source,java]
+----
+import jakarta.validation.groups.Default;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+
+// . . .
+final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+final Schema schema = // . . .
+Set<ConstraintViolation<Schema>> constraintViolations = validator.validate(providedStore, CommonValidationGroups.Managed.class);
+----
+
+Note that in that case, if we specify only the `jakarta.validation.groups.Default` group (or any group) in the validator,
+we will only evaluate default groups related constraint although our custom validation groups extends from the default group.
+
+[source,java]
+----
+import jakarta.validation.groups.Default;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+
+// . . .
+final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+final Schema schema = // . . .
+Set<ConstraintViolation<Schema>> constraintViolations = validator.validate(providedStore);
+
+/* Managed / NotManaged groups constraints will not be evaluated, although they extend the default group
+ * as none of them are specified in the `validate` statement
+ */
+----

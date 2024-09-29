@@ -695,3 +695,90 @@ public class ParameterizedServiceImpl implements ParameterizedService {
     // . . .
 }
 ----
+
+== FactoryBean
+
+When the creation of a specific bean type requires a complex logic, we can encapsulate this in a `FactoryBean` class
+and delegate the creation of the bean to it. For that we must define a class implementing the `FactoryBean<T>` interface of
+extending the class `AbstractFactoryBean<T>`, being `T` the type of the bean to create:
+
+[source,java]
+----
+import org.springframework.beans.factory.config.AbstractFactoryBean;
+
+public class ComplexServiceFactoryBean extends AbstractFactoryBean<ComplexService> {
+
+    private final DependencyService dependencyService;
+
+    private String configurationValue;
+
+    public ComplexServiceFactoryBean(DependencyService dependencyService) {
+        this.dependencyService = dependencyService;
+        // Singleton by default. Set `false` to create prototype instances
+//        setSingleton(false);
+    }
+
+    public ComplexServiceFactoryBean setConfigurationValue(String configurationValue) {
+        this.configurationValue = configurationValue;
+        return this;
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return ComplexService.class;
+    }
+
+    @Override
+    protected ComplexService createInstance() throws Exception {
+        return new ComplexServiceImpl(dependencyService)
+            .setConfigurationValue(configurationValue);
+    }
+}
+----
+
+And then configure the `FactoryBean` as a bean using the name that will we assigned to the final bean, `complexService` in the example:
+
+[source,java]
+----
+@Configuration
+public class FactoryBeanConfig {
+
+    @Bean("complexService")
+    public ComplexServiceFactoryBean complexServiceFactory(DependencyService dependencyService) {
+        return new ComplexServiceFactoryBean(dependencyService)
+            .setConfigurationValue("configuration_value");
+    }
+}
+----
+
+After that, we will be capable of injecting bean instances that will be `singletons` of `prototypes` depending on the configuration
+made in the `FactoryBean` (see `setSingleton` method):
+
+[source,java]
+----
+@Autowired
+private ComplexService complexService;
+
+@Autowired
+private ComplexServiceFactoryBean complexServiceFactoryBean;
+
+// . . .
+
+ComplexService serviceFromFactory = complexServiceFactoryBean.getObject();
+----
+
+Using the **bean name** configured in the `@Bean` annotation of the interface, we will also be able of retrieving
+bean instance and its related `FactoryBean` through `ApplicationContext`
+
+[source,java]
+----
+@Autowired
+private ApplicationContext context;
+
+// . . .
+
+// It is needed to add a '&' to the bean name to retrieve factory instance and then the bean instance through the getObjectMethod
+ComplexService localService1 = ((ComplexServiceFactoryBean) context.getBean("&complexService")).getObject();
+// And use the bean name directly to retrieve the bean instance
+ComplexService localService2 = (ComplexService) context.getBean("complexService");
+----

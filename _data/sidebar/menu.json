@@ -31,6 +31,10 @@
 			{
 				"title": "Dependency Injection",
 				"url": "/pages/spring/dependency_injection/"
+			},
+			{
+				"title": "Validation",
+				"url": "/pages/spring/validation/"
 			}
 		]
 	},
