@@ -31,19 +31,19 @@ Estos son los temas que cubre el examen **1z0-805** y son requeridos para pasar 
 	* Manejo de Cadenas
 * **Excepciones y aserciones**
 	* [Aserciones](/java/ocp-7/2018-02-07-ocp7_08_aserciones)		
-	* Excepciones (I)
+	* [Excepciones (I)](/java/ocp-7/2014-07-03-ocp7_excepciones_1)
 	* Excepciones (II)
 * **Patrones de diseño**
 	* Patrones de Diseño en Java (Singleton, Factory y Dao)
 * **JDBC**
 	* Conexión JDBC en Java 7
 * **Concurrencia**
-	* Introducción
+	* [Introducción](/java/ocp-7/2014-06-20-ocp7_11_hilos_01_introduccion)
 	* [Control de Errores Inesperados](/java/ocp-7/2018-02-17-ocp7_11_hilos_02_control_de_errores_inesperados)		
-	* Mecanismos básicos en la plataforma Java
-	* ReentrantReadWriteLock
+	* [Mecanismos básicos en la plataforma Java](/java/ocp-7/2018-01-27-ocp7_11_hilos_03_mecanismos_basicos_en_la_plataforma_java)
+	* [ReentrantReadWriteLock](/java/ocp-7/2020-04-22-ocp7_11_hilos_04_reentrant_read_write_lock)
 	* Variables atómicas y bloqueos de sincronización
-	* Colecciones con protección de Thread
+	* [Colecciones con protección de Thread](/java/ocp-7/2018-12-30-ocp7_11_hilos_06_colecciones_con_proteccion_de_thread)
 	* Fork Join
 	* [Paralelismo](/java/ocp-7/2020-05-07-ocp7_11_hilos_08_paralelismo)
 	* E/S Simultánea
