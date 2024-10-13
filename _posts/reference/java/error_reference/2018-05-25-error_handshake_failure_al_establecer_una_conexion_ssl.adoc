@@ -1,0 +1,149 @@
+---
+author: Antonio Archilla
+title: Error Handshake Failure al establecer una conexión SSL
+date: 2018-05-25
+categories: [ "references", "java", "error reference" ]
+tags: [ "java", "ssl" ]
+layout: post
+excerpt_separator: <!--more-->
+---
+
+== Descripción de error
+
+Se produce un error de tipo **Handshake Failure** (detalle del tipo de error en este http://smallbusiness.chron.com/cause-ssl-handshake-failure-60530.html[enlace]) 
+cuando se intenta establecer una conexión con un servidor externo a través del protocolo SSL.
+
+// <!--more-->
+
+== Solución propuesta
+
+El problema del detalle de error recibido es que no es lo suficientemente aclarativo de la causa del mismo. 
+Por ello, se deben comprobar diversas posibles soluciones, ya que puede darse por diversos motivos:
+
+La clave pública del certificado del servidor remoto no se encuentra en el almacén de claves::
++
+​Por defecto la máquina virtual de Java establece que las claves públicas de los certificados de servidores externos necesarios para establecer conexiones seguras 
+a través del protocolo SSL se guardan en el almacén de claves ubicado en `$JAVA_HOME/jre/lib/security/cacerts`. En caso de que estas claves se encuentren en un almacén distinto, 
+se tendrá que especificar su ubicación mediante la propiedad del sistema `javax.net.ssl.trustStore`. 
+Si ésta está protegida por una contraseña se deberá especificar adicionalmente la opción `javax.net.ssl.trustStorePassword`.
++
+En el arranque:
++
+[source,sh]
+----
+java -Djavax.net.ssl.trustStore path_hacia_fichero_cacerts -Djavax.net.ssl.trustStorePassword password_fichero_cacerts ...
+----
++
+Programáticamente:
++
+[source,java]
+----
+System.setProperty("javax.net.ssl.trustStore", "<strong><path_hacia_fichero_cacerts></strong>");
+System.setProperty("javax.net.ssl.trustStorePassword", "<strong><password_fichero_cacerts></strong>");
+----
++
+Para comprobar si el certificado correspondiente se encuentra en el almacén de claves, se puede utilizar la herramienta keytool que proporciona la instalación de la `JDK` en la ubicación `$JAVA_HOME/bin`
++ 
+[source,sh]
+----
+keytool -list -v -keystore <strong><path_hacia_fichero_cacerts></strong>
+----
++
+El **flag** `-v` proporciona información adicional en el listado resultante que puede ser necesaria para poder identificar más fácilmente el certificado, 
+por ejemplo, a través de su número de serie u otros valores identificativos como la huella digital, y si este es aún válido. Un ejemplo de entrada del listado resultante sería el siguiente:
++
+[source,properties]
+----
+Alias name: digicertassuredidg3 [jdk]
+Creation date: 25-ago-2016
+Entry type: trustedCertEntry
+ 
+Owner: CN=DigiCert Assured ID Root G3, OU=www.digicert.com, O=DigiCert Inc, C=US
+Issuer: CN=DigiCert Assured ID Root G3, OU=www.digicert.com, O=DigiCert Inc, C=US
+Serial number: ba15afa1ddfa0b54944afcd24a06cec
+Valid from: Thu Aug 01 14:00:00 CEST 2013 until: Fri Jan 15 13:00:00 CET 2038
+Certificate fingerprints:
+     MD5:  7C:7F:65:31:0C:81:DF:8D:BA:3E:99:E2:5C:AD:6E:FB
+     SHA1: F5:17:A2:4F:9A:48:C6:C9:F8:A2:00:26:9F:DC:0F:48:2C:AB:30:89
+     SHA256: 7E:37:CB:8B:4C:47:09:0C:AB:36:55:1B:A6:F4:5D:B8:40:68:0F:BA:16:6A:95:2D:B1:00:71:7F:43:05:3F:C2
+     Signature algorithm name: SHA384withECDSA
+     Version: 3
+----
++
+Se debe tener en cuenta que para que un certificado sea válido, es posible que también sea necesario incluir en el almacén de claves los certificados intermedios y raíz de la cadena de certificación:
++
+image::/assets/posts/reference/java/error_reference/2018-05-25-error_handshake_failure_al_establecer_una_conexion_ssl_fig1.jpg[]
++
+En caso de faltar algún certificado en el almacén de claves, se deberá importar mediante la opción `importcert` de la utilidad `keytool`:
+[source,sh]
+----
+keytool -import -alias nuevo_alias_certificado -file path_fichero_certificado -keystore path_cacerts
+----
+
+El algoritmo de cifrado establecido para la comunicación a través de SSL no está soportado por la JVM::
++
+Si la solución propuesta en el apartado anterior no da resultado, se deberá realizar un diagnóstico más exhaustivo para encontrar la causa del error. 
+Para ello, será necesario activar el modo debug para las conexiones **SSL** realizadas por la **JVM** especificando la opción de arranque `-Djavax.net.debug=all` en la aplicación.
++
+Gracias a ella, aparecerán en la salida estándar las trazas de log necesarias para realizar el diagnóstico.
++
+Si en las trazas de diagnóstico aparece un línea similar a la siguiente:
++
+[source]
+----
+handling exception: javax.net.ssl.SSLHandshakeException: Server chose TLSv1, but that protocol version is not enabled or not supported by the client.
+SEND TLSv1.2 ALERT:  fatal, description = handshake_failure
+----
++
+Esto indicará que el servidor intenta enviar datos cifrados con un algoritmo que no está soportado por la JVM. 
+Para saber de qué algoritmo se trata, se puede ejecutar la siguiente línea de comandos (**bash**):
++
+[source,sh]
+----
+openssl s_client -connect <host>:<port> -<protocolo>
+----
++
+Dónde:
+
+- **host**, **port**: Corresponden al host y puerto destino de la conexión
+- **protocolo**: Corresponde al protocolo que se utilizará en la conexión. Los posibles valores incluyen -ssl2 (SSLv2), -ssl3 (SSLv3), -tls1_2 (TLSv1.2), -tls1_1  (TLSv1.1), -tls1 (TLSv1) o -dtls1 (DTLSv1). 
++
+Para obtener una lista completa de las opciones se puede consultar mediante el comando de ayuda `openssl s_client –help`
++
+Al ejecutar el comando `openssl` indicando un protocolo determinado, se podrá saber qué algoritmos de cifrado están soportados. 
+A modo de ejemplo, este modelo de respuesta para el protocolo **TLSv1.1** indicaría que es necesario disponer del algoritmo **AES256-SHA** para poder establecer la conexión:
++
+[source]
+----
+---
+SSL handshake has read 2733 bytes and written 542 bytes
+---
+New, TLSv1/SSLv3, Cipher is AES256-SHA
+Server public key is 2048 bit
+Secure Renegotiation IS NOT supported
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+SSL-Session:
+    Protocol  : TLSv1.1
+    Cipher    : AES256-SHA
+    Session-ID: [...]
+    Session-ID-ctx:
+    Master-Key: [...]
+    Key-Arg   : None
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    Start Time: 1526278253
+    Timeout   : 7200 (sec)
+    Verify return code: 0 (ok)
+---
+----
++
+La solución a este problema una vez se ha detectado que no se dispone del algoritmo apropiado es tan sencilla como habilitarlo dentro de la **JVM**, 
+dado que por defecto ésta habilita solo un subconjunto de ellos por problemas de jurisdicción con algunos países donde está limitada su utilización. 
+Se deberá descargar la extensión **Java Cryptography Extension (JCE) Unlimited Stregth** desde el sitio oficial de Oracle y substituir los ficheros 
+`$JAVA_HOME/jre/lib/security/local_policy.jar` y `$JAVA_HOME/jre/lib/security/US_export_policy.jar` por los descargados, en caso de haberlos.
++
+http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html[Enlace de descarga de la extensión para Java 8]
+
