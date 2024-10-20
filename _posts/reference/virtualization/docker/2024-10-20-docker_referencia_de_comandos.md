@@ -8,6 +8,8 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
+<!--more-->
+
 NOTE: WORK IN PROGRESS
 
 ## Índice

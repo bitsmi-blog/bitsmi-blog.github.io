@@ -8,6 +8,8 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
+<!--more-->
+
 * [Fechas y localización](#fechas-y-localizacion)
 	* [Consulta de la zona horaria actual del sistema](#consulta-zona-horaria)
 	* [Modificar zona horaria del sistema](#modificar-zona-horaria)
@@ -21,7 +23,6 @@ excerpt_separator: <!--more-->
 * [Servicios](#servicios)
 	* [Ejecución de servicios](#ejecucion-servicios)
 	* [Consultas sobre servicios](#consulta-servicios)
-
 
 ## Fechas y localización ## {#fechas-y-localizacion}
 
