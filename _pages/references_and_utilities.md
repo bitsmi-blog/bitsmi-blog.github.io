@@ -80,6 +80,13 @@ layout: post
 - [{{post.title}}]({{post.url}})
 {% endfor %}
 
+### XML
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories contains 'xml'" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
+
 [//]: #---------------------------
 
 ## Javascript
@@ -109,6 +116,13 @@ layout: post
 ### Scripts and Utilities
 
 {% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'system' and post.categories contains 'scripts and utilities'" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
+
+### Ubuntu
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'system' and post.categories contains 'ubuntu'" %}
 {% for post in posts %}
 - [{{post.title}}]({{post.url}})
 {% endfor %}

@@ -42,3 +42,23 @@ at org.apache.struts.action.ActionServlet.parseModuleConfigFile(ActionServlet.ja
 ### Solución
 
 No se está utilizando una JDK compatible con el servidor. OC4J es compatible solamente con la JDK 1.4 y este es un error correspondiente al uso del servidor con una JDK superior.
+
+## Error "Not in an application scope – start OC4J with the -userThreads switch if using user-created threads"
+
+Este error se produce dentro de un proyecto J2EE que dispone de código fuente que genera hilos bajo demanda del programador. 
+El servidor detecta dicha generación manual y muestra el mensaje de error dando una pista sobre cómo solucionar el problema de compatibilidad.
+
+### Solución
+
+En el caso concreto comentado es obligatorio utilizar el atributo `-userThreads` (**Enable context lookup support from user-created threads**) del servidor OC4J. 
+Esto permite que el servidor sea capaz de gestionar además de los hilos internos propios también los creados manualmente por el usuario desde la aplicación J2EE.
+
+Este parámetro debe indicarse en el Script de arranque del servidor (en caso de ejecutarse des de consola también debe añadirse como parámetro):
+
+```sh
+java -jar oc4j.jar -userthreads
+```
+
+### Referencias
+
+- [Documentación Oficial](http://sqltech.cl/doc/oas10gR31/web.1013/b28950/sysprops.htm)

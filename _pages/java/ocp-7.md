@@ -28,11 +28,11 @@ Estos son los temas que cubre el examen **1z0-805** y son requeridos para pasar 
 	* Diseño avanzado de una clase JAVA
 	* La herencia en las interfaces Java
 	* Genéricos y colecciones – Introducción
-	* Manejo de Cadenas
+	* [Manejo de Cadenas](/java/ocp-7/2014-06-18-ocp7_07_manejo_cadenas)
 * **Excepciones y aserciones**
 	* [Aserciones](/java/ocp-7/2018-02-07-ocp7_08_aserciones)		
 	* [Excepciones (I)](/java/ocp-7/2014-07-03-ocp7_excepciones_1)
-	* Excepciones (II)
+	* [Excepciones (II)](/java/ocp-7/2018-01-27-ocp7_excepciones_2)
 * **Patrones de diseño**
 	* Patrones de Diseño en Java (Singleton, Factory y Dao)
 * **JDBC**
