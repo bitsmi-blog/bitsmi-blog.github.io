@@ -5,6 +5,9 @@ date: 2024-04-21
 layout: post
 ---
 
+* Do not remove this line (it will not be displayed)
+{:toc}
+
 ## Database
 
 ### Oracle
@@ -28,6 +31,11 @@ layout: post
 [//]: #---------------------------
 
 ## Java
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories.size == 2" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
 
 ### Application Servers
 
@@ -62,6 +70,13 @@ layout: post
 ### JVM
 
 {% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories contains 'jvm'" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
+
+### IDE
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'java' and post.categories contains 'ide'" %}
 {% for post in posts %}
 - [{{post.title}}]({{post.url}})
 {% endfor %}
@@ -146,3 +161,10 @@ layout: post
 {% endfor %}
 
 [//]: #---------------------------
+
+## Web
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'web' and post.categories.size == 2" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}

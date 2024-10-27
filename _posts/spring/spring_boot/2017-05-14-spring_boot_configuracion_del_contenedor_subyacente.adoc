@@ -1,0 +1,76 @@
+---
+author: Antonio Archilla
+title: Spring Boot – Configuración del contenedor subyacente
+date: 2017-05-14
+categories: [ "spring", "spring-boot" ]
+layout: post
+excerpt_separator: <!--more-->
+---
+
+Una de las principales características del framework **Spring Boot** es permite la ejecución de aplicaciones web sin necesidad de usar servidores de aplicaciones externos donde desplegarlas. 
+Esto lo consigue mediante el uso de un contenedor incrustado en la misma aplicación (**Tomcat**, **Jetty** o **Undertow**). 
+Aunque el framework configura por defecto este contenedor con valores válidos en muchos de los casos, a veces las peculiaridades de las aplicaciones hacen que se tengan que modificar ciertos parámetros 
+de la configuración, como por ejemplo el soporte para HTTPS o el tamaño máximo peticiones de las peticiones, por poner algunos ejemplos. 
+En este post se explicará la manera de personalizar estos valores.
+
+// <!--more-->
+
+**Spring Boot** permite la configuración de muchos de estos parámetros mediante la especificaciones de propiedades en el fichero `application.properties`. 
+Este es el caso de la configuración de los principales parámetros de red (puertos, interfaces de red, conexión SSL), sesión (timeouts, persistencia, configuración de cookies…), gestión de errores, etc. 
+En el apéndice de documentación relacionada se interés se encuentra la referencia de los parámetros de configuración permitidos (sección **Web Properties**).
+
+A parte de la configuración mediante las propiedades definidas en el fichero `application.properties` y similares, 
+también existe la posibilidad de especificar ciertos valores que pueden no estar disponibles para su configuración mediante este método. 
+**Spring Boot** permite la configuración programática de los conectores para los diferentes contenedores soportados (**Tomcat**, **Jetty** o **Undertow**) 
+mediante la definición de Beans específicos. Para ello, se creará un Bean de tipo `TomcatEmbeddedServletContainerFactory`, `JettyEmbeddedServletContainerFactory` o `UndertowEmbeddedServletContainerFactory`, 
+según se requiera, dónde se pueden especificar valores de configuración concretos para cada uno de ellos. 
+Un ejemplo de esto sería la configuración en **Tomcat** de la propiedad que permite especificar para qué métodos (`POST`, `PUT`, `DELETE`) se parsearán los parámetros incluidos 
+en el cuerpo de las peticiones recibidas por el servidor. Por defecto, **Tomcat** sólo realiza esta operación para peticiones de tipo `POST`, 
+pero habitualmente se requiere poder especificar parámetros en los cuerpos de peticiones `PUT` o `DELETE`, sobretodo en servicios de tipo RESTful, 
+dónde cada una de estas operaciones tiene una semántica determinada y no siempre es viable utilizar sólo peticiones `POST`. 
+Si la aplicación se desplegara sobre un servidor **Tomcat** independiente, esta configuración se realizaría sobre el componente `Connector` correspondiente definido en el fichero `server.xml`, 
+tal y como especifica la referencia de **Tomcat**: 
+
+[source,xml]
+----
+<Connector port="8080" protocol="HTTP/1.1"
+           connectionTimeout="20000"
+           redirectPort="8443"
+           parseBodyMethods="POST,PUT,DELETE"
+           URIEncoding="UTF-8" />
+---- 
+
+Mediante la definición en el contexto de **Spring** del **Bean** de configuración del conector de **Tomcat**, se permite realizar esta misma configuración de forma programática 
+en el contenedor incrustado en la aplicaciones basadas en **Spring Boot**:
+
+[source,java]
+----
+@Configuration
+@EnableAsync
+public class AppConfig extends WebMvcConfigurerAdapter {   
+    
+    /**
+     * Configuración del conector de Tomcat. Se habilita el parseo de los parámetros
+     * incluidos en los cuerpos de peticiones POST, PUT y DELETE
+     */
+    @Bean
+    public TomcatEmbeddedServletContainerFactory containerFactory() {
+        return new TomcatEmbeddedServletContainerFactory() 
+        {
+            protected void customizeConnector(Connector connector) {
+                super.customizeConnector(connector);
+                connector.setParseBodyMethods("POST,PUT,DELETE");
+            }
+        };
+    }
+ 
+    // . . .
+}
+----
+
+## Enlaces de interés
+
+- https://projects.spring.io/spring-boot/[Página principal del proyecto Spring Boot]
+- https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html[Referéncia de propiedades de configuración de Spring Boot]
+- https://tomcat.apache.org/tomcat-8.0-doc/config/http.html[Referéncia de configuración de Tomcat 8]
+

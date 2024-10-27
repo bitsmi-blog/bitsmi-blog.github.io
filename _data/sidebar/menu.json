@@ -33,6 +33,10 @@
 				"url": "/pages/spring/dependency_injection/"
 			},
 			{
+				"title": "Spring Boot",
+				"url": "/pages/spring/spring_boot/"
+			},
+			{
 				"title": "Validation",
 				"url": "/pages/spring/validation/"
 			}
