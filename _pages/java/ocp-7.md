@@ -36,7 +36,7 @@ Estos son los temas que cubre el examen **1z0-805** y son requeridos para pasar 
 * **Patrones de diseño**
 	* Patrones de Diseño en Java (Singleton, Factory y Dao)
 * **JDBC**
-	* Conexión JDBC en Java 7
+	* [Conexión JDBC en Java 7](/java/ocp-7/2014-07-03-ocp7_12_conexiones_jdbc_en_java7)
 * **Concurrencia**
 	* [Introducción](/java/ocp-7/2014-06-20-ocp7_11_hilos_01_introduccion)
 	* [Control de Errores Inesperados](/java/ocp-7/2018-02-17-ocp7_11_hilos_02_control_de_errores_inesperados)		
@@ -46,11 +46,11 @@ Estos son los temas que cubre el examen **1z0-805** y son requeridos para pasar 
 	* [Colecciones con protección de Thread](/java/ocp-7/2018-12-30-ocp7_11_hilos_06_colecciones_con_proteccion_de_thread)
 	* Fork Join
 	* [Paralelismo](/java/ocp-7/2020-05-07-ocp7_11_hilos_08_paralelismo)
-	* E/S Simultánea
-	* Sincronizadores
+	* [E/S Simultánea](/java/ocp-7/2020-05-13-ocp7_11_hilos_09_es_simultanea)
+	* [Sincronizadores](/java/ocp-7/2020-05-11-ocp7_11_hilos_10_sincronizadores)
 * **Localización**
-	* Localización
-	* Localización (II)
+	* [Localización](/java/ocp-7/2014-07-01-ocp7_13_localizacion)
+	* [Localización (II)](/java/ocp-7/2017-10-18-ocp7_13_localizacion_2)
 * **NIO.2**
 	* Principios básicos de E/S
 	* E/S de archivos Java – Parte 1 – NIO.2 (New Input Output 2)
