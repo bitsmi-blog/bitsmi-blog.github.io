@@ -1,7 +1,7 @@
 ---
 author: Xavsal
 title: Java – Guía rápida – 1ª parte
-date: 2024-10-27
+date: 2014-03-05
 categories: [ "references", "java" ]
 tags: [ "reference", "java" ]
 layout: post

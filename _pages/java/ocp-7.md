@@ -24,7 +24,7 @@ Estos son los temas que cubre el examen **1z0-805** y son requeridos para pasar 
 
 * **Mejoras en el lenguaje**
 	* Repaso general de la sintaxis Java
-	* Diseño de una clase Java
+	* [Diseño de una clase Java](/java/ocp-7/2014-07-01-ocp7_03_diseno_de_una_clase_java)
 	* Diseño avanzado de una clase JAVA
 	* La herencia en las interfaces Java
 	* Genéricos y colecciones – Introducción
