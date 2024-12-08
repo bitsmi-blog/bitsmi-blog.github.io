@@ -17,6 +17,13 @@ layout: post
 - [{{post.title}}]({{post.url}})
 {% endfor %}
 
+### SQL
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'database' and post.categories contains 'sql'" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
+
 [//]: #---------------------------
 
 ## DevOps
@@ -121,6 +128,22 @@ layout: post
 {% endfor %}
   
 [//]: #---------------------------
+
+## Other
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'other' and post.categories.size == 2" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
+
+### Error Reference
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'other' and post.categories contains 'error reference'" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
+  
+[//]: #---------------------------
   
 ## SCM
   
@@ -172,6 +195,15 @@ layout: post
 ## Web
 
 {% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'web' and post.categories.size == 2" %}
+{% for post in posts %}
+- [{{post.title}}]({{post.url}})
+{% endfor %}
+
+[//]: #---------------------------
+
+## Webservices
+
+{% assign posts = site.categories["references"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'webservices' and post.categories.size == 2" %}
 {% for post in posts %}
 - [{{post.title}}]({{post.url}})
 {% endfor %}
