@@ -163,7 +163,7 @@ A nivel de uso hay muchos desarrolladores que encapsulan la gestión de todas la
 
 ## Estructura de memoria de Java
 
-![](/assets/posts/reference/java/2024-10-27-java-guia_rapida_I_fig1.jpg)
+![](/assets/posts/reference/java/2014-03-05-java-guia_rapida_I_fig1.jpg)
 
 - **HeapMemory**: Utilizada para almacenar objetos.
 - **Tenured**: El SO habilita memoria para el proceso.
@@ -209,7 +209,7 @@ y una ruta nativa para cargar las bibliotecas de Java Native Interface (JNI). Pu
 
 ### Proceso de la memoria en Java
 
-![](/assets/posts/reference/java/2024-10-27-java-guia_rapida_I_fig2.jpg)
+![](/assets/posts/reference/java/2014-03-05-java-guia_rapida_I_fig2.jpg)
 
 ### Ejecución del Garbage Collector
 

@@ -25,8 +25,8 @@ Estos son los temas que cubre el examen **1z0-805** y son requeridos para pasar 
 * **Mejoras en el lenguaje**
 	* Repaso general de la sintaxis Java
 	* [Diseño de una clase Java](/java/ocp-7/2014-07-01-ocp7_03_diseno_de_una_clase_java)
-	* Diseño avanzado de una clase JAVA
-	* La herencia en las interfaces Java
+	* [Diseño avanzado de una clase Java](/java/ocp-7/2014-07-12-ocp7_04_diseno_avanzado_de_una_clase_java)
+	* [La herencia en las interfaces Java](/java/ocp-7/2014-07-01-ocp7_05_herencia_en_las_interfaces_java)
 	* Genéricos y colecciones – Introducción
 	* [Manejo de Cadenas](/java/ocp-7/2014-06-18-ocp7_07_manejo_cadenas)
 * **Excepciones y aserciones**
@@ -52,7 +52,7 @@ Estos son los temas que cubre el examen **1z0-805** y son requeridos para pasar 
 	* [Localización](/java/ocp-7/2014-07-01-ocp7_13_localizacion)
 	* [Localización (II)](/java/ocp-7/2017-10-18-ocp7_13_localizacion_2)
 * **NIO.2**
-	* Principios básicos de E/S
+	* [Principios básicos de E/S](/java/ocp-7/2014-07-03-ocp7_09_principios_basicos_de_es)
 	* E/S de archivos Java – Parte 1 – NIO.2 (New Input Output 2)
 	* E/S de archivos Java – Parte 2 – Interfaz FileVisitor
 	* E/S de archivos Java – Parte 3 – FileStore y WatchService
