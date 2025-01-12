@@ -23,11 +23,11 @@ Al disponer de JRE (Java Runtime Environment) para su ejecución éste interpret
 Estos son los temas que cubre el examen **1z0-805** y son requeridos para pasar el examen:
 
 * **Mejoras en el lenguaje**
-	* Repaso general de la sintaxis Java
+	* [Repaso general de la sintaxis Java](/java/ocp-7/2014-07-01-ocp7_02_repaso_general_de_la_sintaxis_java)
 	* [Diseño de una clase Java](/java/ocp-7/2014-07-01-ocp7_03_diseno_de_una_clase_java)
 	* [Diseño avanzado de una clase Java](/java/ocp-7/2014-07-12-ocp7_04_diseno_avanzado_de_una_clase_java)
 	* [La herencia en las interfaces Java](/java/ocp-7/2014-07-01-ocp7_05_herencia_en_las_interfaces_java)
-	* Genéricos y colecciones – Introducción
+	* [Genéricos y colecciones – Introducción](/java/ocp-7/2014-07-04-ocp7_06_genericos_y_colecciones_introduccion)
 	* [Manejo de Cadenas](/java/ocp-7/2014-06-18-ocp7_07_manejo_cadenas)
 * **Excepciones y aserciones**
 	* [Aserciones](/java/ocp-7/2018-02-07-ocp7_08_aserciones)		
@@ -53,7 +53,7 @@ Estos son los temas que cubre el examen **1z0-805** y son requeridos para pasar 
 	* [Localización (II)](/java/ocp-7/2017-10-18-ocp7_13_localizacion_2)
 * **NIO.2**
 	* [Principios básicos de E/S](/java/ocp-7/2014-07-03-ocp7_09_principios_basicos_de_es)
-	* E/S de archivos Java – Parte 1 – NIO.2 (New Input Output 2)
-	* E/S de archivos Java – Parte 2 – Interfaz FileVisitor
+	* [E/S de archivos Java – Parte 1 – NIO.2 (New Input Output 2)](/java/ocp-7/2015-11-04-ocp7_10_es_de_archivos_java_parte1_nio2)
+	* [E/S de archivos Java – Parte 2 – Interfaz FileVisitor](/java/ocp-7/2015-12-02-ocp7_10_es_de_archivos_java_parte2_filevisitor)
 	* E/S de archivos Java – Parte 3 – FileStore y WatchService
 	
