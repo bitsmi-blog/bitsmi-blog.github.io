@@ -42,9 +42,9 @@ Estos son los temas que cubre el examen **1z0-805** y son requeridos para pasar 
 	* [Control de Errores Inesperados](/java/ocp-7/2018-02-17-ocp7_11_hilos_02_control_de_errores_inesperados)		
 	* [Mecanismos básicos en la plataforma Java](/java/ocp-7/2018-01-27-ocp7_11_hilos_03_mecanismos_basicos_en_la_plataforma_java)
 	* [ReentrantReadWriteLock](/java/ocp-7/2020-04-22-ocp7_11_hilos_04_reentrant_read_write_lock)
-	* Variables atómicas y bloqueos de sincronización
+	* [Variables atómicas y bloqueos de sincronización](/java/ocp-7/2019-01-07-ocp7_11_hilos_05_variables_atomicas_y_bloqueos_de_sincronizacion)
 	* [Colecciones con protección de Thread](/java/ocp-7/2018-12-30-ocp7_11_hilos_06_colecciones_con_proteccion_de_thread)
-	* Fork Join
+	* [Fork Join](/java/ocp-7/2020-05-20-ocp7_07_fork_join)
 	* [Paralelismo](/java/ocp-7/2020-05-07-ocp7_11_hilos_08_paralelismo)
 	* [E/S Simultánea](/java/ocp-7/2020-05-13-ocp7_11_hilos_09_es_simultanea)
 	* [Sincronizadores](/java/ocp-7/2020-05-11-ocp7_11_hilos_10_sincronizadores)
@@ -55,5 +55,5 @@ Estos son los temas que cubre el examen **1z0-805** y son requeridos para pasar 
 	* [Principios básicos de E/S](/java/ocp-7/2014-07-03-ocp7_09_principios_basicos_de_es)
 	* [E/S de archivos Java – Parte 1 – NIO.2 (New Input Output 2)](/java/ocp-7/2015-11-04-ocp7_10_es_de_archivos_java_parte1_nio2)
 	* [E/S de archivos Java – Parte 2 – Interfaz FileVisitor](/java/ocp-7/2015-12-02-ocp7_10_es_de_archivos_java_parte2_filevisitor)
-	* E/S de archivos Java – Parte 3 – FileStore y WatchService
+	* [E/S de archivos Java – Parte 3 – FileStore y WatchService](/java/ocp-7/2015-12-03-ocp7_10_es_de_archivos_java_parte3_filestore_y_watchservice)
 	
