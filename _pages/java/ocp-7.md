@@ -34,7 +34,7 @@ Estos son los temas que cubre el examen **1z0-805** y son requeridos para pasar 
 	* [Excepciones (I)](/java/ocp-7/2014-07-03-ocp7_excepciones_1)
 	* [Excepciones (II)](/java/ocp-7/2018-01-27-ocp7_excepciones_2)
 * **Patrones de diseño**
-	* Patrones de Diseño en Java (Singleton, Factory y Dao)
+	* [Patrones de Diseño en Java (Singleton, Factory y Dao)](/java/ocp-7/2016-03-27-ocp7_14_patrones_de_diseno_en_java)
 * **JDBC**
 	* [Conexión JDBC en Java 7](/java/ocp-7/2014-07-03-ocp7_12_conexiones_jdbc_en_java7)
 * **Concurrencia**

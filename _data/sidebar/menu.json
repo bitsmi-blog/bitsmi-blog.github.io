@@ -37,6 +37,10 @@
 				"url": "/pages/spring/spring_boot/"
 			},
 			{
+				"title": "Patterns",
+				"url": "/pages/spring/patterns/"
+			},
+			{
 				"title": "Validation",
 				"url": "/pages/spring/validation/"
 			}
