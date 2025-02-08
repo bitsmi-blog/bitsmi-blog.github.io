@@ -27,7 +27,24 @@
 	},
 	{
 		"title": "References & Utilities",
-		"url": "/pages/references_and_utilities/"
+		"children": [
+			{
+				"title": "Database",
+				"url": "/pages/references/database/"
+			},
+			{
+				"title": "Java",
+				"url": "/pages/references/java/"
+			},
+			{
+				"title": "Virtualization",
+				"url": "/pages/references/virtualization/"
+			},
+			{
+				"title": "Other",
+				"url": "/pages/references/other/"
+			}
+		]
 	},
 	{
 		"title": "Spring",
