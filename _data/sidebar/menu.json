@@ -3,12 +3,16 @@
 		"title": "Java",
 		"children": [
 			{
-				"title": "OCP7 – 1z0-805",
-				"url": "/pages/java/ocp-7/"
+				"title": "OCP - Current",
+				"url": "/pages/java/ocp-current/"
 			},
 			{
-				"title": "OCP17 - 1z0-829",
-				"url": "/pages/java/ocp-17/"
+				"title": "OCP7 – 1z0-805",
+				"url": "/pages/java/ocp-7-1z0-805/"
+			},
+			{
+				"title": "OCP11 - 1z0-819",
+				"url": "/pages/java/ocp-17-1z0-819/"
 			}
 		]
 	},
