@@ -1,5 +1,9 @@
 [
 	{
+		"title": "Clean Code",
+		"url": "/pages/clean_code/"
+	},
+	{
 		"title": "Java",
 		"children": [
 			{
