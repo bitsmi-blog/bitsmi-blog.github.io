@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 10 – E/S de archivos Java – Parte 1 – NIO.2 (New Input Output 2)
 date: 2015-11-04
 categories: [ "java", "ocp-7" ]

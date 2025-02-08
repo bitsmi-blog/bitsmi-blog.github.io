@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: Weblogic – Doble despliegue de una aplicación J2EE
 date: 2014-07-09
 categories: [ "references", "java", "application servers", "weblogic" ]

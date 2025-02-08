@@ -1,5 +1,5 @@
 ---
-author: xavsal
+author: Xavier Salvador
 title: Error de codificación Unicode en un mensaje Javascript
 date: 2014-06-16
 categories: [ "references", "javascript", "ECMA-script" ]

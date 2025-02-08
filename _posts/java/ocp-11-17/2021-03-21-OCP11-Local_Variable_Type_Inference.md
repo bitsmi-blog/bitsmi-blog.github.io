@@ -1,5 +1,5 @@
 ---
-author: xavsal
+author: Xavier Salvador
 title: OCP11 - Local Variable Type Inference
 date: 2021-03-21
 categories: [ "java", "ocp-11-17" ]

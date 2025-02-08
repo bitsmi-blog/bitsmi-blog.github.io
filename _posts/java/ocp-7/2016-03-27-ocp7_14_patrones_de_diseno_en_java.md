@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 14 – Patrones de dseño en Java (Singleton, Factory y DAO)
 date: 2016-03-27
 categories: [ "java", "ocp-7" ]

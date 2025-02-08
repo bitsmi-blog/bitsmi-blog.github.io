@@ -1,5 +1,5 @@
 ---
-author: xavsal
+author: Xavier Salvador
 title: Método Unscape en Javascript
 date: 2014-04-10
 categories: [ "references", "javascript", "ECMA-script" ]

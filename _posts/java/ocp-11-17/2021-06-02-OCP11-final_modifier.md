@@ -1,5 +1,5 @@
 ---
-author: xavsal
+author: Xavier Salvador
 title: OCP 11 - Language Enhancements (Java Fundamentals - Final modifier)
 date: 2021-06-02
 categories: [ "java", "ocp-11-17" ]

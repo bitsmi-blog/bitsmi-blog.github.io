@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: Guía rápida Maven
 date: 2022-04-05
 categories: [ "references", "java", "build tools" ]

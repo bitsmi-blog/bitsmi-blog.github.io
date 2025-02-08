@@ -1,5 +1,5 @@
 ---
-author: xavsal
+author: Xavier Salvador
 title: Discusión - Fork vs Branch en Git
 date: 2020-05-04
 categories: [ "references", "scm", "scripts and utilities" ]

@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 11 – Hilos (10) – Sincronizadores
 date: 2020-05-11
 categories: [ "java", "ocp-7" ]

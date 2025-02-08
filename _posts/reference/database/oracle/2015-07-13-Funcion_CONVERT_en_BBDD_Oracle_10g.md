@@ -1,5 +1,5 @@
 ---
-author: xavsal
+author: Xavier Salvador
 title: Función CONVERT en BBDD Oracle 10g
 date: 2015-06-13
 categories: [ "references", "database", "oracle" ]

@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 07 – Manejo de Cadenas
 date: 2014-06-18
 categories: [ "java", "ocp-7" ]

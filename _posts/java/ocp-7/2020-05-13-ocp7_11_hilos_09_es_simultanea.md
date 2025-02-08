@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 13 – E/S simultánea
 date: 2020-05-13
 categories: [ "java", "ocp-7" ]

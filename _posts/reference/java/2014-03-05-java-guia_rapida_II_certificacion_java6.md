@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: Java – Guía rápida – 2ª parte - Certificación Java 6
 date: 2014-03-05
 categories: [ "references", "java" ]

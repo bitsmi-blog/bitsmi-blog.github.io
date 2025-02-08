@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 10 – E/S de archivos Java – Parte 3 – FileStore y WatchService
 date: 2015-12-03
 categories: [ "java", "ocp-7" ]

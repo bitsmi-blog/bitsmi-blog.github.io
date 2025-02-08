@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: Tabla de Códigos ASCII – American Standard Code for Information Interchange
 date: 2024-12-08
 categories: [ "references", "other" ]

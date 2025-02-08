@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 11 – Hilos (05) – Variables atómicas y bloqueos de sincronización
 date: 2019-01-07
 categories: [ "java", "ocp-7" ]

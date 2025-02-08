@@ -1,5 +1,5 @@
 ---
-author: xavsal
+author: Xavier Salvador
 title: Imágenes con atributos alt
 date: 2014-04-10
 categories: [ "references", "javascript", "ECMA-script" ]

@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 11 – Hilos (06) – Colecciones con protección de Thread	
 date: 2018-12-30
 categories: [ "java", "ocp-7" ]

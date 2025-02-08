@@ -1,5 +1,5 @@
 ---
-author: xavsal
+author: Xavier Salvador
 title: OCP11 - Creating nested classes (II) - Declaring an Inner Class
 date: 2021-10-30
 categories: [ "java", "ocp-11-17" ]

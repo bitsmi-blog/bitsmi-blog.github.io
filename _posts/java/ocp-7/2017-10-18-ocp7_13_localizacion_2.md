@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 13 – Localización
 date: 2017-10-18
 categories: [ "java", "ocp-7" ]

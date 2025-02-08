@@ -1,5 +1,5 @@
 ---
-author: xavsal
+author: Xavier Salvador
 title: Cálculo del tamaño de una BBDD Oracle
 date: 2014-05-08
 categories: [ "references", "database", "oracle" ]

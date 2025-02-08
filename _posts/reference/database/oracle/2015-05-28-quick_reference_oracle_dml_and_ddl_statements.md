@@ -1,5 +1,5 @@
 ---
-author: xavsal
+author: Xavier Salvador
 title: Quick reference - Oracle DML and DDL statements
 date: 2015-05-28
 categories: [ "references", "database", "oracle" ]

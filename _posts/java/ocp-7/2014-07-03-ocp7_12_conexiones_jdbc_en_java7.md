@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 12 – Conexión JDBC en Java 7
 date: 2014-07-03
 categories: [ "java", "ocp-7" ]

@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: Variables de entorno para OC4J
 date: 2014-04-11
 categories: [ "references", "java", "application servers", "oc4j" ]

@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: Errores comunes del servidor OC4J
 date: 2014-05-08
 categories: [ "references", "java", "application servers", "oc4j" ]

@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: IntelliJ Hotkeys Cheatsheet
 date: 2024-10-27
 categories: [ "references", "java", "ide" ]

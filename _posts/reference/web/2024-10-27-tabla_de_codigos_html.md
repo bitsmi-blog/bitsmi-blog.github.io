@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: Tabla de códigos HTML
 date: 2024-10-27
 categories: [ "references", "web" ]

@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: Rutas de instalación del servidor OC4J
 date: 2014-05-07
 categories: [ "references", "java", "application servers", "oc4j" ]

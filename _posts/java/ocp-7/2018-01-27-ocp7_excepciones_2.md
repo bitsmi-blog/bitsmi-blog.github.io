@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 08 – Excepciones (II)
 date: 2018-01-27
 categories: [ "java", "ocp-7" ]

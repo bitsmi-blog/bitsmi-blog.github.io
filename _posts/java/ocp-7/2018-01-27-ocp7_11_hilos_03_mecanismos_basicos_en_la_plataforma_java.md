@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 11 – Hilos (03) – Mecanismos básicos en la plataforma Java
 date: 2018-01-27
 categories: [ "java", "ocp-7" ]

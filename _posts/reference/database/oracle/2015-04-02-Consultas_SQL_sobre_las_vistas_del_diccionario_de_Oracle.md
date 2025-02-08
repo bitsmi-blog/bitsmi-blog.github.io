@@ -1,5 +1,5 @@
 ---
-author: xavsal
+author: Xavier Salvador
 title: Consultas SQL sobre las vistas del diccionario de Oracle
 date: 2015-04-02
 categories: [ "references", "database", "oracle" ]

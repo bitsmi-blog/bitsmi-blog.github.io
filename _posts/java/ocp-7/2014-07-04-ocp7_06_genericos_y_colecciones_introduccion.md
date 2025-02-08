@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 06 – Genéricos y colecciones – Introducción
 date: 2014-07-04
 categories: [ "java", "ocp-7" ]

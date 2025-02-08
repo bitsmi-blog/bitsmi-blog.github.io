@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: Java – Guía rápida – 1ª parte
 date: 2014-03-05
 categories: [ "references", "java" ]

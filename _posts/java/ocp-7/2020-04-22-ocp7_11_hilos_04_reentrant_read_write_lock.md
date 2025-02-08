@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 11 – Hilos (04) – ReentrantReadWriteLock
 date: 2020-04-22
 categories: [ "java", "ocp-7" ]

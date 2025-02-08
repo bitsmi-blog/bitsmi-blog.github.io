@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 10 – E/S de archivos Java – Parte 2 – Interfaz FileVisitor
 date: 2015-12-02
 categories: [ "java", "ocp-7" ]

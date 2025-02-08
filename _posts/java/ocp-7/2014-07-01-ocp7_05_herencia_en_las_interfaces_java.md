@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 05 – Herencia en las interfaces Java
 date: 2014-07-01
 categories: [ "java", "ocp-7" ]

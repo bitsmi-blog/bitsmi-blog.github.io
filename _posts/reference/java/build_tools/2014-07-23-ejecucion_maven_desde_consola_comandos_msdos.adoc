@@ -1,5 +1,5 @@
 ---
-author: xavsal
+author: Xavier Salvador
 title: Ejecución de Maven des de consola de comandos MS-DOS
 date: 2014-07-23
 categories: [ "references", "java", "build tools" ]

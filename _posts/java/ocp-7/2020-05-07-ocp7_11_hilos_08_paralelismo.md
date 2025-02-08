@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: OCP7 11 – Hilos (08) – Paralelismo
 date: 2020-05-07
 categories: [ "java", "ocp-7" ]

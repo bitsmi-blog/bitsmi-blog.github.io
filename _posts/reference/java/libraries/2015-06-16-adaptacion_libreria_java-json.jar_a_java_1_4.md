@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: Adaptación de librería java-json.jar a JAVA 1.4
 date: 2015-06-16
 categories: [ "references", "java", "libraries" ]

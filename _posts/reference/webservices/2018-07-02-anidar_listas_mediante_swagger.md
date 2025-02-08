@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: Anidar listas de objetos de negocio en un modelo Json mediante Swagger
 date: 2018-07-02
 categories: [ "references", "webservices" ]

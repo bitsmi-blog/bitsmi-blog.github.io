@@ -1,5 +1,5 @@
 ---
-author: Xavsal
+author: Xavier Salvador
 title: Error Adobe AcroExch. al insertar un PDF en un documento de Word
 date: 2014-05-09
 categories: [ "references", "other", "error reference" ]
