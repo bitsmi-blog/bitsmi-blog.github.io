@@ -9,7 +9,7 @@ description: >
 version:          1.0.0
 gitbook_version:  3.2.3
 
-url: 'https://bitsmi-blog.github.io'
+url: 'https://bitsmi.com'
 baseurl: ''
 rss: 
 
@@ -23,6 +23,14 @@ toc:
 
 # customize the link favicon in header, will be {{site.baseurl}}/{{site.favicon_path}}
 favicon_path: /assets/gitbook/images/favicon.ico
+
+# Don't include assets in the sitemap
+defaults:
+  -
+    scope:
+      path: "assets/**"
+    values:
+      sitemap: false
 
 # markdown render engine.
 markdown: kramdown
@@ -74,4 +82,5 @@ plugins:
   - jekyll-paginate
   - jekyll-feed
   - jekyll-readme-index
+  - jekyll-sitemap
   - jemoji
