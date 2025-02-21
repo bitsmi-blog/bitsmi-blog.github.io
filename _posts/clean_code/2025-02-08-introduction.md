@@ -1,6 +1,7 @@
 ---
 author: Antonio Archilla
 title: Introduction
+page_order: 0
 date: 2025-02-08
 categories: [ "clean_code" ]
 tags: [ "clean code" ]
