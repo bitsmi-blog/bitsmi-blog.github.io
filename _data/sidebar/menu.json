@@ -1,5 +1,9 @@
 [
 	{
+		"title": "Clean Code",
+		"url": "/pages/clean_code/"
+	},
+	{
 		"title": "Java",
 		"children": [
 			{
@@ -7,12 +11,16 @@
 				"url": "/pages/java/ocp-current/"
 			},
 			{
-				"title": "OCP7 – 1z0-805",
+				"title": "OCP7 - 1z0-805",
 				"url": "/pages/java/ocp-7-1z0-805/"
 			},
 			{
 				"title": "OCP11 - 1z0-819",
-				"url": "/pages/java/ocp-17-1z0-819/"
+				"url": "/pages/java/ocp-11-1z0-819/"
+			},
+			{
+				"title": "OCP17 - 1z0-829",
+				"url": "/pages/java/ocp-17-1z0-829/"
 			}
 		]
 	},
