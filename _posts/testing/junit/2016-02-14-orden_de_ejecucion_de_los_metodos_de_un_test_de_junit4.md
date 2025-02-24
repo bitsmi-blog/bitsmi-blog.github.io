@@ -9,7 +9,7 @@ excerpt_separator: <!--more-->
 ---
 
 Aunque quizá **JUnit4** sea el framework de testing más extendido en el ecosistema Java, adolece de ciertas limitaciones *de fábrica* que según como se mire son difíciles de explicar. 
-çUna de ellas para mi gusto es la dificultad de poder marcar el orden de ejecución de los métodos de una clase de test de forma sencilla. 
+Una de ellas para mi gusto es la dificultad de poder marcar el orden de ejecución de los métodos de una clase de test de forma sencilla. 
 Entiendo que mirándolo de una forma purista cada uno de los métodos de un test case debe ser independiente y su ejecución no se debería ver afectada por el resto, 
 pero en determinados casos es de mucha ayuda poder marcar el orden de ejecución, como por ejemplo poder probar la conexión a una fuente de datos antes de obtener los datos.
 
