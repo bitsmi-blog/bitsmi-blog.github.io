@@ -60,7 +60,7 @@ For single level categories the snippets is a bit different:
 	"title": "Category 1",
 	"children": [
 		{
-			"title": "Dependency Injection",
+			"title": "Page title",
 			"url": "/pages/category_1/category_2/"
 		}
 	]
@@ -71,6 +71,7 @@ Only leaf nodes have an `url` pointing to the respective page.
 ### Create a new Post
 
 - Create (if doesn't exists) a folder inside `_posts` project's root folder for the category under the post will be classified. 
+- If you want to create a draft so the post is not took into account when the site is built, place in `_drafts` folder instead. It can be moved later to `_posts` when it is finished.
   For example, if you want to create a new post under categories `Spring` > `Dependency Injection`, post file will be placer under `_posts/spring/dependency_injection` folder.
 - Create the post file using the following pattern for its filename `<date>-<name_of_the_post>.<ext>`, where
 	- `<date>` is post publication date in `YYYY-MM-DD` format
