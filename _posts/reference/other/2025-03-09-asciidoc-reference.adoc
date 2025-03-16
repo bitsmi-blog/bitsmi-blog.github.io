@@ -1,0 +1,278 @@
+---
+author: Antonio Archilla
+title: Asciidoc - Reference
+date: 2025-03-09
+categories: [ "references", "other" ]
+layout: post
+excerpt_separator: <!--more-->
+---
+
+:icons: font
+
+:toc:
+
+// <!--more-->
+
+== Blocks
+
+=== Admonition notes
+
+Can be defined as text blocks
+
+[source,asciidoc]
+----
+[NOTE]  
+====  
+Note text can include asciidoc format
+====
+----
+
+Labels other than `NOTE` can be applied, such as `IMPORTANT`, `INFO`, `CAUTION`, `WARNING` and `TIP`
+
+**Example:**
+
+[WARNING]
+====
+Warning text here!!
+====
+
+=== Comments
+
+[source,asciidoc]
+----
+// Sigle line comment
+
+////
+Comment block
+////
+
+[comment]
+--
+Another way to create a comment block
+--
+----
+
+=== Code blocks
+
+[source,asciidoc]
+....
+[source,<language>]
+.Optional code block title
+----
+source code content
+----
+....
+
+`Language` includes `java`, `javascript`, `sh`, `asciidoc`, `properties` and many others.
+
+Source code blocks can also have line comments using the `<.>` macro at the end of the code line and again after the code block with the comment. 
+Numeric references are matched in sequential order.
+
+[source,asciidoc]
+.Source code example
+....
+[source,java]
+.Java code block example
+----
+public class Main {
+    public static void main(String... args) { \<.>
+
+    }
+}
+----
+<.> Main method
+....
+
+The previous code block is rendered as this:
+
+[source,java]
+.Java code block example
+----
+public class Main {
+    public static void main(String... args) { <.>
+
+    }
+}
+----
+<.> Main method
+
+NOTE: If the code block contains `asciidoc` block code, you can use the `....` block separator instead of `----` to avoid unexpected parsing errors
+
+=== Lists
+
+==== Description lists
+
+List mean to be used for term descriptions
+
+[source,asciidoc]
+----
+Item 1::  
+Description list item  
++  
+with several lines including new line separators  
+  
+Item 2:: Descriptions can also include sub-lists  
+Item 2.1:::  
+Item 2.1.1::::  
+Item 3:: And also normal lists. Use `-` to declare first level items  
+and `*` for its sublevels to ensure the proper alignment.  
+- List item 1  
+** List item 1.1
+----
+
+#### Sub-lists
+
+[source,asciidoc]
+----
+* Item 1
+** Item 1.1  
+*** Item 1.1.1
+** Item 1.2
+* Item 2
+----
+
+If items contains line separations, they have to be separated by an extra white line
+
+[source,asciidoc]
+----
+* Item 1
++
+Extra text for item 1
+
+** Item 1.1  
+*** Item 1.1.1
++
+Extra text for item 1.1.1
+
+** Item 1.2
+* Item 2
+----
+
+==== New line separation in list item text
+
+[source,asciidoc]
+----
+* List item title: Some text...
++  
+And additional text for the same item but in a new line
+
+* Another list item: ...
+----
+
+=== Tagged regions
+
+Inside the file that will be included, create a tagged region between start and end markers:
+
+`<comment characters> tag::<tag name>[]`
+`<comment characters> end::<tag name>[]`
+
+And include it in the `adoc` file using an include statement
+
+[source,asciidoc]
+----
+\include::<file name>[tags=<tag name>]
+----
+
+For example, in Java
+
+[source,asciidoc]
+----
+public class Main {
+	// tag::main-method[]
+	public static void main(String... args) {
+		// ...
+	}
+	// end::main-method[]
+}
+----
+
+[source,asciidoc]
+....
+[source,java]
+---
+\include::Main.java[tags=main-method]
+----
+....
+
+See https://docs.asciidoctor.org/asciidoc/latest/directives/include-tagged-regions/[documentation]
+
+
+== Links and references
+
+=== Block references
+
+[source,asciidoc]
+----
+[id=block-id]  
+=== Block title
+
+Block text...
+----
+
+And to reference it:
+
+[source,asciidoc]
+----
+xref:block-id[Block title]
+----
+
+=== Footnotes
+
+Include the macro `\footnote:[<footnote text>]` after the desired text. Footnote text can span several lines:
+
+[source,asciidoc]
+----
+Some sample textfootnote:[  
+Footnote text  
+with several lines  
+]
+----
+
+For reusable footnotes, include an ID after `:` (`disclaimer` in the example below)
+
+[source,asciidoc]
+----
+Some sample textfootnote:disclaimer[Footnote text]  
+  
+Some other text with the same footnotefootnote:disclaimer[]
+----
+
+=== Url links
+
+You can create a url link as easy as writing the url followed by an optional custom link text:
+
+[source,asciidoc]
+----
+http://foo.bar[Foo Bar link text]
+----
+
+== Text format
+
+=== Highlight
+
+Enclose highlighted text in a pair of single or double hash symbols (`#`)
+
+----
+#Highlighted text#
+----
+
+=== Text span
+
+[NOTE]
+====
+Use this to apply custom CSS classes to text
+====
+ 
+If an attribute is associated to a highlighted text
+
+[source,asciidoc]
+----
+The text [.underline]#underline me# is underlined.
+----
+
+It will render the following html code creating a text span section
+
+[source,asciidoc]
+----
+The text <span class="underline">underline me</span> is underlined.
+----
