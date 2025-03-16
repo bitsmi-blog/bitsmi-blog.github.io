@@ -1,6 +1,6 @@
 ---
 author: Xavier Salvador
-title: 2.- Nombres con sentido
+title: 2.- Meaningful names
 page_order: 02
 date: 2025-02-10
 categories: [ "clean_code" ]
@@ -8,11 +8,9 @@ tags: [ "clean code" ]
 layout: post
 excerpt_separator: <!--more-->
 ---
-Meaningful names
-------------------------------
 
-Simple rules for creating good names
------------------------------------------
+## Simple rules for creating good names
+
 Choosing good names takes time but saves more time than it takes.
 
 The name of a variable, function or class should answer all the big questions: why it exists, what it does and how it is used.
@@ -34,9 +32,10 @@ About the **implicity** of the code of a variable as an example, we need to know
 
 - How would I use the x variable being returned?
 
+<!--more-->
 
-Avoid disinformation
-----------------------
+## Avoid disinformation
+
 
 We have to avoid the usage of acronyms, abbreviations as well as the usage of general concepts like List or Map reserved in Java.
 
@@ -58,8 +57,8 @@ else
      l = 01;
 ```
 
-Make Meaningful Distinctions
------------------------------
+## Make Meaningful Distinctions
+
 
 We don't have to write code solely to satisfy a compiler or interpreter like creating klass variable because the name class was used for something else.
 
@@ -69,13 +68,11 @@ Number-series naming (a1, a2. aN) is the opposite of intentional naming. Such na
 
 Noise words are another meaningless distinction and redundant.
 
-Use Pronounceable names
-----------------------------
+## Use Pronounceable names
 
 Simple, make your names pronounceable.
 
-User Searchable names
---------------------------
+## User Searchable names
 
 Avoid the usage of single letter names like a, e or o. Use instead longer names that makes easier to be searched.
 
@@ -85,33 +82,31 @@ The length of a name should correspond to the size of its scope.
 
 If a variable or constant might be seen or used in multiple places in a body of code, it is imperative to give it a search-friendly name.
 
-Avoid Encodings
------------------
+## Avoid Encodings
 
 We have enough encodings to deal with without adding more to our burden. Encoding type or scope information into names simply adds an extra burden of deciphering. Encoded names are seldom pronounceable and are easy to mistype.
 
-Hungarian Notation
-------------------
+## Hungarian Notation
+
 Java programmers don’t need type encoding. Objects are strongly typed, and editing environments have advanced such that they detect a type error long before you can run compile! So nowadays HN and other forms of type encoding are simply impediments. 
 
 They make it harder to change the name or type of variable, function, or class. 
 
 They make it harder to read the code. And they create the possibility that the encoding system will mislead the reader.
 
-Member prefixes
----------------
+## Member prefixes
 
 Don't use anymore the prefix _m for member variables. It is also required to use an editing environment that highlights or colorized members to make distinct.
 
-Interfaces and Implementations
-------------------------------
+## Interfaces and Implementations
+
 Don't use the afix **I** when declaring interfaces, just use the name of the interface and that's all.
 
 In addition to this, it is preferable to encode the implementation of the interface with names like **ShapeFactoryImpl** or **CShapeFactory**.
 
 
-Avoid mental mapping
---------------------
+## Avoid mental mapping
+
 Readers shouldn’t have to mentally translate your names into other names they already know. 
 
 This problem generally arises from a choice to use neither problem domain terms nor solution domain terms.
@@ -130,38 +125,38 @@ One difference between a smart programmer and a professional programmer is that 
 
 Professionals use their powers for good and write code that others can understand.
 
-Class Names
-------------
+## Class Names
+
 Classes and objects should have noun or noun phrase names like Customer, WikiPage, Account, and AddressParser. 
 
 Avoid words like **Manager, Processor, Data, or Info** in the _name of a class_. 
 
 **A class name should not be a verb.**
 
-Method Names
--------------
+## Method Names
+
 Methods should have verb or verb phrase names.
 
 **Accessors, mutators, and predicates** should be named for their value and prefixed with get, set, and is according to the **javabean** standard.
 
-Don't be cute
--------------
+## Don't be cute
+
 Pick one word for an abstract concept and stick with it.
 
 The function names have to stand alone,  and they have to be consistent in order to be understood without additional exploration inside the code.
 
-Don't pun
----------
+## Don't pun
+
 Avoid using the same word for two purposes. Using the same term for two different ideas is essentially a pun.
 
-Use Solution Domain Names
---------------------------
+## Use Solution Domain Names
+
 People who will read the code you develop will be programmers so try to avoid the usage of problem domain names.
 
 Related to technical names, it is ok their use for common technical knowledge that any programmer can understand like Visitor or Factory to describe patterns or what a JobQueue is.
 
-Add Meaningful Context
------------------------
+## Add Meaningful Context
+
 You need to place names in context for your reader by enclosing them in well-named classes, functions, or namespaces. 
 
 Instead of 
@@ -273,13 +268,10 @@ public class Address {
 }
 ```
 
-
-
-
 When all else fails, then prefixing the name may be necessary as a last resort.
 
-Don't add gratuitous context
------------------------------
+## Don't add gratuitous context
+
 Is it a bad practice to add a prefix in every class that belongs an application.
 
 Shorter names are generally better than longer ones, so long as they are clear. Add no more context to a name than is necessary.
@@ -297,8 +289,8 @@ customerAddress
 Address
 ```
 
-Conclusion
-----------
+## Conclusion
+
 The hardest thing about choosing good names is that it requires good descriptive skills and a shared cultural background.
 
 It is a continuously learning process, and it is a skill that must be developed and practiced recurrently.
