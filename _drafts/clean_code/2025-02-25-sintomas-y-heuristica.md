@@ -1,6 +1,6 @@
 ---
 author: Xavier Salvador
-title: 17.- Síntomas y Heurística
+title: 17.- Heuristics ans systems
 page_order: 17
 date: 2025-02-25
 categories: [ "clean_code" ]

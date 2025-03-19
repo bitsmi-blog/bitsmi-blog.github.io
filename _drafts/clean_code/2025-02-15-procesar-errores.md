@@ -1,6 +1,6 @@
 ---
 author: Xavier Salvador
-title: 7.- Procesar errores
+title: 7.- Handling errors
 page_order: 07
 date: 2025-02-15
 categories: [ "clean_code" ]

@@ -1,6 +1,6 @@
 ---
 author: Xavier Salvador
-title: 16.- Refactorización SerialDate
+title: 16.- SerialDate refactor
 page_order: 16
 date: 2025-02-24
 categories: [ "clean_code" ]
