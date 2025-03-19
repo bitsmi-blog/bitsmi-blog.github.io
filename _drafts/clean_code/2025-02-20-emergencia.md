@@ -1,6 +1,6 @@
 ---
 author: Xavier Salvador
-title: 12.- Emergencia
+title: 12.- Emergencies
 page_order: 12
 date: 2025-02-20
 categories: [ "clean_code" ]

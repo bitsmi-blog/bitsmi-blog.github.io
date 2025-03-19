@@ -1,6 +1,6 @@
 ---
 author: Xavier Salvador
-title: 13.- Concurrencia
+title: 13.- Concurrency
 page_order: 13
 date: 2025-02-21
 categories: [ "clean_code" ]
