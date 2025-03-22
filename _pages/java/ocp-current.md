@@ -1,8 +1,6 @@
 ---
 title: OCP 17 - 1Z0-829
-author: Xavier Salvador
-date: 2025-02-08
-layout: post
+layout: page
 ---
 
 ### Summary
