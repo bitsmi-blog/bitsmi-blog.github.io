@@ -1,6 +1,6 @@
 ---
 author: Xavier Salvador
-title: 15.- Aspectos internos JUnit
+title: 15.- Internal Aspect of JUnit
 date: 2025-02-23
 page_order: 15
 categories: [ "clean_code" ]
