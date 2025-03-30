@@ -36,7 +36,6 @@ If the team continues working on it but any clean approach is postponed with "We
 
 
 ## The total cost of owning a mess
-
 **Mess** code is a natural process.
 
 When a team is working in a code during the first years, any move in it is faster and smoother. 
@@ -63,17 +62,13 @@ Writing clean code requires the disciplined use of myriad little techniques appl
 
 A programmer with this **"code-sense"** will be able to confront the **"mess"** and choose the best variation preserving the transformation of the code from here to there ending in an elegantly coded system more readable and functionally working exactly as the original **mess**.
 
-
-
 ## Some quotes from famous programmers about clean code
 
 ### Bjarne Stroustrup, inventor of C++ and author of The C++ Programming Language
 _I like my code to be elegant and efficient. The logic should be straightforward to make it hard for bugs to hide, the dependencies minimal to ease maintenance, error handling complete according to an articulated strategy, and performance close to optimal so as not to tempt people to make the code messy with unprincipled optimizations. Clean code does one thing well._
 
-
 ### Grady Booch, author of Object Oriented Analysis and Design with Applications
 _Clean code is simple and direct. Clean code reads like well-written prose. Clean code never obscures the designer’s intent but rather is full of crisp abstractions and straightforward lines of control._
-
 
 ### “Big” Dave Thomas, founder of OTI, godfather of the Eclipse strategy
 _Clean code can be read, and enhanced by a developer other than its original author. It has unit and acceptance tests. It has meaningful names. It provides one way rather than many ways for doing one thing. It has minimal dependencies, which are explicitly defined, and provides a clear and minimal API. Code should be literate since depending on the language, not all necessary information can be expressed clearly in code alone._

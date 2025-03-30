@@ -17,7 +17,7 @@ They are also very dangerous when the comments are inaccurate.
 
 Truth can only be found in one place: the code. Only the code can truly tell you what it does. It is the only source of truly accurate information.
 
-Note: Comments can be useful in some exceptional cases.
+**Note: Comments can be useful in some exceptional cases.**
 
 Comments Do not make backup for code
 ------------------------------------------------
@@ -27,32 +27,33 @@ Review the code and rewrite it again to try to be clear and expressive instead o
 
 Explain yourself in code
 ----------------------------
-Instead of adding comments to the code, simply create a function that says the same thing as the comment you want to write.
+Instead of adding comments to the code, **simply create** a function that says the same thing as the comment you want to write.
 
 Good comments
 --------------------
-Some comments are necessary or beneficial.
+**Some comments are necessary or beneficial.**
 
-- Legal comments
+- **Legal comments**
   Sometimes our corporate coding standards force us to write certain comments for legal reasons. For example, copyright and authorship statements are necessary and reasonable things to put into a comment at the start of each source file.
 
 Where possible, refer to a standard license or other external document rather than putting all the terms and conditions into the comment.
 
-- Informative comments
+- **Informative comments**
   It is sometimes useful to provide basic information with a comment.
 
-```java
+``` java
 // format matched kk:mm:ss EEE, MMM dd, yyyy
    Pattern timeMatcher = Pattern.compile(“\\d*:\\d*:\\d* \\w*, \\w* \\d*, \\d*”);
+```
 
 In this case the comment lets us know that the regular expression is intended to match a time and date that were formatted with the SimpleDateFormat.format function using the specified format string.
 
-- Explanation of Intent
+- Explanation of **Intent**
 
 Sometimes a comment goes beyond just useful information about the implementation and provides the intent behind a decision.
 
 Example 1
-``` java
+```  java
 public int compareTo(Object o)
    {
      if(o instanceof WikiPagePath)
@@ -64,6 +65,7 @@ public int compareTo(Object o)
      }
      return 1; // we are greater because we are the right type.
    }
+```
 
 Example 2
 ``` java
@@ -86,10 +88,13 @@ public void testConcurrentAddWidgets() throws Exception {
        }
        assertEquals(false, failFlag.get());
      }
+```
 
+- **Clarification**
 
-- Clarification
-Sometimes it is just helpful to translate the meaning of some obscure argument or return value into something that’s readable. In general it is better to find a way to make that argument or return value clear in its own right; but when its part of the standard library, or in code that you cannot alter, then a helpful clarifying comment can be useful.
+Sometimes it is just helpful to translate the meaning of some obscure argument or return value into something that’s readable. 
+
+In general it is better to find a way to make that argument or return value clear in its own right; but when its part of the standard library, or in code that you cannot alter, then a helpful clarifying comment can be useful.
 
 ``` java
 public void testCompareTo() throws Exception
@@ -111,8 +116,9 @@ public void testCompareTo() throws Exception
      assertTrue(ab.compareTo(aa) == 1);  // ab > aa
      assertTrue(bb.compareTo(ba) == 1);  // bb > ba
    }
+```
 
-- Warning of consequences
+- **Warning of consequences**
 
 Sometimes it is useful to warn other programmers about certain consequences
 ``` java
@@ -128,36 +134,37 @@ Sometimes it is useful to warn other programmers about certain consequences
      assertSubString("Content-Length: 1000000000", responseString);
      assertTrue(bytesSent > 1000000000);
    }
+```
 
 Nowadays, of course, we’d turn off the test case by using the @Ignore attribute with an appropriate explanatory string. @Ignore(”Takes too long to run”).
 
-- TODO Comments
+- **TODO Comments**
 It is sometimes reasonable to leave “To do” notes in the form of //TODO comments.
 
 TODOs are jobs that the programmer thinks should be done, but for some reason can’t do at the moment.
 
 Whatever else a TODO might be, it is not an excuse to leave bad code in the system.
 
--Amplification
+- **Amplification**
 
 A comment may be used to amplify the importance of something that may otherwise seem inconsequential.
 
 ```Java
-String listItemContent = match.group(3).trim();
+    String listItemContent = match.group(3).trim();
    // the trim is real important.  It removes the starting
    // spaces that could cause the item to be recognized
    // as another list.
    new ListItemWidget(this, listItemContent, this.level + 1);
    return buildList(text.substring(match.end()));
-
--Bad comments
+```
+- **Bad comments**
 Most comments fall into this category.
 
--Mumbling
+- **Mumbling**
 
 Don't create comments if you don't pretend they are useful.  Be precise, concise and describe everything as well as you can.
 
--Redundant comments
+- **Redundant comments**
 These comments serve only to clutter and obscure the code. They serve no documentary purpose at all.
 Example:
 ```java
@@ -173,15 +180,16 @@ Example:
            throw new Exception("MockResponseSender could not be closed");
       }
    }
+```
 
--Misleading comments
+- **Misleading comments**
 Sometimes, with all the best intentions, a programmer makes a statement in his comments that isn’t precise enough to be accurate.
 
--Mandated comments
+- **Mandated comments**
 It is just plain silly to have a rule that says that every function must have a javadoc, or every variable must have a comment. Comments like this just clutter up the code, propagate lies, and lend to general confusion and disorganization.
 
-''' Java
-/**
+``` Java
+  /**
     *
     * @param title The title of the CD
     * @param author The author of the CD
@@ -197,13 +205,14 @@ It is just plain silly to have a rule that says that every function must have a 
      cd.duration = duration;
      cdList.add(cd);
    }
+ ```
 
 Not useful in this case.
 
-- Journal comments
+- **Journal comments**
 Sometimes people add a comment to the start of a module every time they edit it. These comments accumulate as a kind of journal, or log, of every change that has ever been made. I have seen some modules with dozens of pages of these run-on journal entries.
 Example
-''' java
+``` java
     * Changes (from 11-Oct-2001)
     * --------------------------
     * 11-Oct-2001 : Re-organised the class and moved it to new package
@@ -223,31 +232,29 @@ Example
     * 29-May-2003 : Fixed bug in addMonths method (DG);
     * 04-Sep-2003 : Implemented Comparable.  Updated the isInRange javadocs (DG);
     * 05-Jan-2005 : Fixed bug in addYears() method (1096282) (DG);
+```
 
 Nowadays, however, these long journals are just more clutter to obfuscate the module. They should be completely removed.
 
--Noise Comments
-
+- **Noise Comments**
 These comments restate the obvious and provide no new information about the code.
 
-- Redundant/Obvious Comments
-
+- **Redundant/Obvious Comments**
 Comments like /** Default constructor. */ add no new information and quickly become noise.
-- Frustration or “Venting” Comments
 
+- **Frustration or “Venting” Comments**
 Instead of using comments to express frustration (e.g., // Give me a break!), the author suggests refactoring the code to remove the source of frustration.
-- Commented-Out Code
 
+- **Commented-Out Code**
 Leaving chunks of code inside comments leads to confusion and clutter. Modern version control systems remember old changes, so simply remove unused code rather than commenting it out.
-- Noisy or Misplaced Javadoc
 
-Comments should focus on clarifying genuinely nonobvious details, not on repeating what the code already states, nor on containing large amounts of irrelevant or system-wide information.
-- Better Alternatives to Comments
+- **Noisy or Misplaced Javadoc**
+Comments should focus on clarifying genuinely non obvious details, not on repeating what the code already states, nor on containing large amounts of irrelevant or system-wide information.
 
+- **Better Alternatives to Comments**
 Use meaningful variable names, small well-named functions, and clearly structured logic. Often, what might have been explained in a comment can be expressed directly in the code.
-- Position Markers and Closing-Brace Comments
 
-Elaborate banners (// Actions //////////////////////////////////) and closing-brace labels (} // while) are generally unnecessary if functions are short and well-structured.
--Example of Poor vs. Improved Code
+- **Position Markers and Closing-Brace Comments**
+Elaborate banners <u>(// Actions //////////////////////////////////) and closing-brace labels (} // while)</u> are generally unnecessary if functions are short and well-structured.
 
-The text contrasts a “GeneratePrimes.java” example (filled with redundant comments and unclear structure) with a cleaner, refactored “PrimeGenerator.java.” The improved version shows how minimal, purposeful comments—alongside good naming and small functions—make the code more readable and maintainable.
+
