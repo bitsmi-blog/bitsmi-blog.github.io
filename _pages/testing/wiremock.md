@@ -1,8 +1,6 @@
 ---
 title: Wiremock
-author: Antonio Archilla
-date: 2024-08-25
-layout: post
+layout: page
 ---
 
 {% assign posts = site.categories["testing"] | sort:"title" | where_exp:"post", "post.url and post.categories contains 'wiremock'" %}

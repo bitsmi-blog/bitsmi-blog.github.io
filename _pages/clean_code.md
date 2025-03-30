@@ -1,8 +1,6 @@
 ---
 title: Clean Code
-author: Xavier Salvador
-date: 2025-02-08
-layout: post
+layout: page
 ---
 
 {% assign posts = site.categories["clean_code"] | sort:"page_order" %}

@@ -8,8 +8,8 @@ layout: home
 <section class="normal markdown-section">
                     
 {% for post in sorted_posts reversed %}
-	<h2 id="multi-release-jars"><a href="{{post.url}}">{{post.title}}</a></h2>
-	<h5>{{ post.date | date: "%d-%m-%Y" }} - {{post.author}}</h5>
+	<h2><a href="{{post.url}}">{{post.title}}</a></h2>
+	<p><div style="font-weight: bold">{{ post.date | date: "%d-%m-%Y" }} - {{post.author}}</div></p>
 	
 	{{post.excerpt}}
 	

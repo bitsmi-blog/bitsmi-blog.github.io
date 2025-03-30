@@ -1,8 +1,6 @@
 ---
 title: Other
-author: Antonio Archilla
-date: 2025-02-08
-layout: post
+layout: page
 ---
 
 * Do not remove this line (it will not be displayed)
