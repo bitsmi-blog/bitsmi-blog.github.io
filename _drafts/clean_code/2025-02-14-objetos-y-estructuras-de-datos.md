@@ -1,6 +1,6 @@
 ---
 author: Xavier Salvador
-title: 6.- Objetos y Estructuras de Datos
+title: 6.- Objects and Data Structures
 page_order: 06
 date: 2025-02-14
 categories: [ "clean_code" ]

@@ -9,14 +9,11 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 ### Summary
-
 These group of posts pretend to be a quick summary to check when required to gather and review the most important concepts of the book.
 
 It is recommended to read the book to get more detailed information about the topic that the reader wants to review.
 
-
 ### Introduction
-
 For coding is not enough to gain knowledge of principles, patterns, practices and heuristics.
 
 It requires a continuing try and failure because Clean Code is a hard work process to learn from it.
