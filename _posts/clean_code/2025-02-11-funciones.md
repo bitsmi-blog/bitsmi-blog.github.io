@@ -15,6 +15,8 @@ Small
 * Always small.
 * They are the main line of organization in any program.
 
+<!--more-->
+
 Blocks and Indenting
 -------------------------
 **If, else, while** statements up to one line long as a function call.

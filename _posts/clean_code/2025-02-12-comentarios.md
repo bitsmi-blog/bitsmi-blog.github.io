@@ -19,6 +19,8 @@ Truth can only be found in one place: the code. Only the code can truly tell you
 
 **Note: Comments can be useful in some exceptional cases.**
 
+<!--more-->
+
 Comments Do not make backup for code
 ------------------------------------------------
 One of reasons why comments are written is because of the bad code.
