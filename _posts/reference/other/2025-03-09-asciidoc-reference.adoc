@@ -246,6 +246,38 @@ You can create a url link as easy as writing the url followed by an optional cus
 http://foo.bar[Foo Bar link text]
 ----
 
+=== TOC
+
+To create a **Table of Contents** referring to the different sections of the document. 
+
+[source,asciidoc]
+----
+
+:toc:
+
+== Section 1
+
+=== Section 1.1
+
+----
+
+By default, only level 1 (==) and 2 (===) section titles are displayed. This can be customized using `:toclevels:` attribute
+
+[source,asciidoc]
+.Display up to level 3 (====) section titles
+----
+
+:toc:
+:toclevels: 3
+
+== Section 1
+
+=== Section 1.1
+
+==== Section 1.1.1 
+
+----
+
 == Text format
 
 === Highlight

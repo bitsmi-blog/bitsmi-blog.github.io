@@ -10,6 +10,9 @@ excerpt_separator: <!--more-->
 
 :icons: font
 
+:toc:
+:toclevels: 3
+
 JUnit provides mechanisms to execute a test multiple times with different input values. Here is a basic quick guide on how to create a more reusable test code base using these capabilities.
 
 // <!--more-->
