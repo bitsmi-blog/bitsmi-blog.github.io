@@ -1,0 +1,534 @@
+---
+author: Antonio Archilla
+title: Parameterized tests
+date: 2025-04-04
+categories: [ "testing", "junit" ]
+tags: [ "junit" ]
+layout: post
+excerpt_separator: <!--more-->
+---
+
+:icons: font
+
+:toc:
+:toclevels: 3
+
+JUnit provides mechanisms to execute a test multiple times with different input values. Here is a basic quick guide on how to create a more reusable test code base using these capabilities.
+
+// <!--more-->
+
+JUnits **parameterized tests** requires the `junit-jupiter-params` dependency:
+
+[code,xml]
+.pom.xml
+----
+<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-params</artifactId>
+    <scope>test</scope>
+</dependency>
+----
+
+Once included, `@Test` methods can be transformed into `@ParameterizedTest` to allow test input parameters
+that can be used to provide different fixture or expected values to each test execution. Depending on the **source**
+specified (`@*Source`) annotation we will be able to specify these values from using different data sources.
+
+[source,java]
+.Example of parameterized test using a simple numeric data source:
+----
+@ParameterizedTest
+@ValueSource(longs = {
+    100L,
+    200L,
+    300L
+})
+void valueSourceTest1(Long param) {
+    // . . .
+}
+----
+
+== Parameter source types
+
+=== Single parameter
+
+==== @ValueSource
+
+Allow specifying a single parameter to the test method.
+Supported types include `shorts`, `bytes`, `ints`, `longs`, `floats`, `doubles`, `chars`, `booleans`, `strings` and `classes`.
+Only one of the supported types may be specified per declaration.
+
+[source,java]
+----
+@ParameterizedTest
+@ValueSource(strings = {
+    "Foo",
+    "Bar",
+    "Baz"
+})
+void valueSourceTest(String param) {
+    assertThat(param)
+        .describedAs("actualResult")
+        .isNotNull()
+        .hasSizeGreaterThanOrEqualTo(0);
+}
+----
+
+The `@ValueSource` annotation doesn’t accept null values. You can use `@NullSource` to provide a null argument for the test
+
+==== @EmptySource
+
+Provides an empty value to compatible types, including:
+
+* `String`
+* `java.util.Collection` and concrete subtypes with a public no-arg constructor
+* `java.util.List`
+* `java.util.Set`
+* `java.util.SortedSet`
+* `java.util.NavigableSet`
+* `java.util.Map` and concrete subtypes with a public no-arg constructor
+* `java.util.SortedMap`
+* `java.util.NavigableMap`
+* Primitive arrays, for example `int[]`, `char[][]`
+* Object arrays, for example `String[]`, `Integer[][]`
+
+==== @NullSource
+
+Provides a **null** parameter value to compatible types. Cannot be used for an argument that has a primitive type.
+
+==== @NullAndEmptySource
+
+Combines `@EmptySource` and `@NullSource` in one annotation, providing both **null** and **empty** values to compatible parameters
+
+==== @EnumSource
+
+Allow specifying Enum constant values as test input parameter, optionally restricting it to a set of them using
+`names` and `mode` annotation fields. For example, in the following test method, a value of the `MeasureUnit` enum
+is provided in each execution. Values are restricted to the provided names as default mode is `INCLUDE`.
+
+[source,java]
+----
+@ParameterizedTest
+@EnumSource(value = MeasureUnit.class, names = { "KILOMETER", "METER", "CENTIMETER" })
+void enumSourceTest(MeasureUnit measureUnit) {
+    // . . .
+}
+----
+
+==== Combining multiple annotations
+
+Annotations described above can be combined to provide multiple parameters to the test. For example, to add
+**null** and **empty** cases to `String` test inputs:
+
+[source,java]
+----
+@ParameterizedTest
+@ValueSource(strings = {
+    "Foo",
+    "Bar",
+    "Baz"
+})
+@EmptySource
+@NullSource
+void valueSourceTest(String param) {
+    // . . .
+}
+----
+
+=== Multiple parameters
+
+==== @CsvSource
+
+Allows to specify `@ParameterizedTest` method parameter as inline CSV on every row is a set
+of parameter values that will be supplied as parameters. `@CsvSource` allows specifying content
+as a text block for **Java 17**+ or as an array.
+
+[source,java]
+.@CsvSource using an array of Strings
+----
+@ParameterizedTest
+@CsvSource(
+    delimiterString = ";",
+    value = {
+        "# KEY;     VALUE;     RESULT",
+        "Key1;      1;         'TestDataMethod1:1'",
+        "Key2;      2;         'TestDataMethod2:2'",
+        "Key3;      3;         'TestDataMethod3:3'"
+    }
+)
+void csvSourceTest(
+    String providedKey,
+    Integer providedValue,
+    String expectedResult
+) {
+    // . . .
+}
+----
+
+[source,java]
+.@CsvSource using a text block
+----
+@ParameterizedTest
+@CsvSource(
+    delimiterString = ";",
+    quoteCharacter = '"',
+    textBlock = """
+        # KEY;     VALUE;      RESULT
+          "Key1";  1;          "TestDataMethod1:1"
+          "Key2";  2;          "TestDataMethod2:2"
+          "Key3";  3;          "TestDataMethod3:3"
+        """
+)
+void csvSourceTest(
+    String providedKey,
+    Integer providedValue,
+    String expectedResult
+) {
+    // . . .
+}
+----
+
+We can use `#` character to include a header with column names that will be ignored but is useful to identify every column.
+It also provides attributes to customize the format of the CSV, like the delimiter (`,` by default) and quote character (`'` by default) used.
+
+==== @CsvFileSource
+
+Same as `@CsvSource` but the values are located in a file in the classpath or project's root folder. As with `@CsvSource` using a text block,
+any line beginning with a # symbol will be interpreted as a comment and will be ignored.
+
+[source,java]
+----
+@ParameterizedTest
+@CsvFileSource(
+    delimiterString = ";",
+    quoteCharacter = '"',
+    // Skip header
+    numLinesToSkip = 1,
+    // Use files to search in project root folder
+//        files = { "./parameterized_tests_csv_file_source.csv" }
+    // Use resources to search in classpath
+    resources = { "/parameterized_tests_csv_file_source.csv" }
+)
+void csvFileSourceTest1(
+    String providedKey,
+    Integer providedValue,
+    String expectedResult
+) {
+    // . . .
+}
+----
+
+==== @MethodSource
+
+`@MethodSource` annotation allow us to define complex test parameters using a static method as provider.
+We have to specify the provider method name as the annotation value attribute or leave it unspecified
+if the provider method has the same name as the test method.
+
+Provider method should return a `Stream<org.junit.jupiter.params.provider.Arguments>` where every element
+is a tuple of parameter for a single test method invocation.
+
+[source]
+----
+@ParameterizedTest
+@MethodSource("provideTestData")
+void methodSourceTest(
+    String providedKey,
+    Integer providedValue,
+    String expectedResult
+) {
+    // . . .
+}
+
+private static Stream<Arguments> provideTestData() {
+    return Stream.of(
+        Arguments.of("Key1", 1, "Result1"),
+        Arguments.of("Key2", 2, "Result2"),
+        Arguments.of("Key3", 3, "Result3")
+    );
+}
+----
+
+[source,java]
+.`@MethodSource` data provider method is inferred from test name if not specified
+----
+@ParameterizedTest
+@MethodSource
+void methodSourceTest(
+    String providedKey,
+    Integer providedValue,
+    String expectedResult
+) {
+    // . . .
+}
+
+private static Stream<Arguments> methodSourceTest() {
+    return Stream.of(
+        // . . .
+    );
+}
+----
+
+==== @FieldSource
+
+Since **JUnit 5.11** we can use `@FieldSource` experimental annotation to define `@ParameterizedTest` parameters using a static
+class field which name is referenced in the annotation.
+
+[source,java]
+----
+private static final List<String> fieldSourceTestData = List.of("VALUE1", "VALUE2", "VALUE3");
+
+@ParameterizedTest
+@FieldSource("fieldSourceTestData")
+void fieldSourceTest(String providedKey) {
+    // . . .
+}
+----
+
+If no field names are declared, a field within the test class that has the same name as the test method will be used as the field by default.
+
+Static fields can be defined as:
+
+[cols="1,2"]
+|===
+| @ParameterizedTest method | static field
+
+| void test(String)         | static List<String> params
+| void test(String)         | static String[] params
+| void test(int)            | static int[] params
+| void test(int[])          | static int[][] params
+| void test(String, String) | static String[][] params
+| void test(String, int)    | static Object[][] params
+| void test(int)            | static Supplier<IntStream> paramSupplier
+| void test(String)         | static Supplier<Stream<String>> paramSupplier
+| void test(String, int)    | static Supplier<Stream<Object[]>> paramSupplier
+| void test(String, int)    | static Supplier<Stream<Arguments>> paramSupplier
+| void test(int[])          | static Supplier<Stream<int[]>> paramSupplier
+| void test(int[][])        | static Supplier<Stream<int[][]>> paramSupplier
+| void test(Object[][])     | static Supplier<Stream<Object[][]>> paramSupplier
+|===
+
+==== Custom annotated source
+
+Custom annotations can be defined to provide your own way to define `@ParameterizedTest` parameters.
+For example, the following custom annotation allows defining a fixed number of sample parameters that will be provided to the test method.
+The implementation in charge of generating these parameters is specified by the `@ArgumentsSource` annotation
+
+[source,java]
+----
+@Documented
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@ArgumentsSource(SamplesArgumentProvider.class)
+public @interface SamplesSource
+{
+    int DEFAULT_NUMBER_OF_SAMPLES = 3;
+
+    int value() default DEFAULT_NUMBER_OF_SAMPLES;
+}
+----
+
+And the implementation of the provider, implementing the `AnnotationConsumer` interface for the previous annotation
+
+[source,java]
+----
+public class SamplesArgumentProvider implements ArgumentsProvider, AnnotationConsumer<SamplesSource> {
+
+    private int numberOfSamples = SamplesSource.DEFAULT_NUMBER_OF_SAMPLES;
+
+    /**
+     * Access the annotation definition in the test method
+     */
+    @Override
+    public void accept(SamplesSource samplesSource) {
+        validateSampleSource(samplesSource);
+
+        this.numberOfSamples = samplesSource.value();
+    }
+
+    /**
+     * Provide test method parameters as a Stream of arguments (like in @MethodSource)
+     */
+    @Override
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+        return IntStream.range(0, numberOfSamples)
+            .mapToObj(this::buildSample);
+    }
+
+    private void validateSampleSource(SamplesSource samplesSource) {
+        if (samplesSource.value() < 1) {
+            throw new IllegalArgumentException("Samples value must be greater than 0");
+        }
+    }
+
+    private Arguments buildSample(int index) {
+        final String key = "TestDataMethod" + index;
+        final String value = "Value" + index;
+        final String result = "%s:%s".formatted(key, value);
+
+        return Arguments.of(key, value, result);
+    }
+}
+----
+
+Then, test method can be defined as this:
+
+[source,java]
+----
+@ParameterizedTest
+@SamplesSource(5)
+void argumentsSourceTest2(
+    String providedKey,
+    String providedValue,
+    String expectedResult
+) {
+    final String actualResult = "%s:%s".formatted(providedKey, providedValue);
+
+    assertThat(actualResult)
+        .describedAs("actualResult")
+        .isEqualTo(expectedResult);
+}
+----
+
+If we don't need to pass configuration attributes to the provider through a custom annotation, we can set the `@ArgumentSource` on the test:
+
+[source,java]
+----
+@ParameterizedTest
+@ArgumentsSource(SimpleArgumentProvider.class)
+void argumentsSourceTest1(
+    String providedKey,
+    String providedValue,
+    String expectedResult
+) {
+    // . . .
+}
+----
+
+[WARNING]
+====
+Argument providers implementing `org.junit.jupiter.params.support.AnnotationConsumer`
+cannot be used with `@ArgumentsSource` as they require an annotation
+====
+
+== Access arguments
+
+In addition to simply defining test method parameters, **JUnit** provide other ways to
+retrieve parameters inside test methods.
+
+=== ArgumentsAccessor
+
+`ArgumentsAccessor` can be used with `@CsvSource`, `@CsvFileSource` and `@MethodSource`, exposing a public API for accessing arguments of a `@ParameterizedTest`
+that allows accessing them in a type-safe manner with support for automatic type conversion.
+
+[source,java]
+----
+@ParameterizedTest
+@CsvSource(
+    delimiterString = ";",
+    quoteCharacter = '"',
+    textBlock = """
+        # KEY;     VALUE;   RESULT
+          "Key1";  1;       "TestDataMethod1:1"
+          "Key2";  2;       "TestDataMethod2:2"
+          "Key2";  3;       "TestDataMethod3:3"
+        """
+)
+void csvSourceTest(ArgumentsAccessor accessor) {
+    final String providedKey = accessor.getString(0);
+    final Integer providedValue = accessor.getInteger(1);
+    final String expectedResult = accessor.getString(2);
+
+    // . . .
+}
+----
+
+=== AggregateWith
+
+`@AggregateWith` annotation allows
+
+[source,java]
+----
+@ParameterizedTest
+@CsvSource(
+    delimiterString = ";",
+    quoteCharacter = '"',
+    textBlock = """
+        # KEY;     VALUE;   RESULT
+          "Key1";  1;       "TestDataMethod1:1"
+          "Key2";  2;       "TestDataMethod2:2"
+          "Key3";  3;       "TestDataMethod3:3"
+        """
+)
+void csvSourceTest3(@AggregateWith(ProvidedValueDtoAggregator.class) ProvidedValueDto providedValueDto) {
+    final String actualResult = "%s:%s".formatted(providedValueDto.key, providedValueDto.value);
+
+    assertThat(actualResult)
+        .describedAs("actualResult")
+        .isEqualTo(providedValueDto.expectedResult);
+}
+----
+
+== Display name and test name
+
+`@ParameterizedTest` allows to display a custom name for each method execution, including information about test execution index or parameter values.
+Can be combined with `@DisplayName`, using it to provide the common part of test name and including the specific part for
+method execution, such as parameter values, in `@Parameterized` 's `name` attribute using placeholders.
+
+[source,java]
+----
+@DisplayName("tested method should return ")
+@ParameterizedTest(name = "{index} - {2} when key = {0} and value = {1} are provided")
+@MethodSource
+void methodSourceTest(
+        String providedKey,
+        String providedValue,
+        String expectedResult
+) {
+    // . . .
+}
+----
+
+`@Parameterized` 's `name` attribute allowed placeholders include:
+
+* `{index}`: Current invocation index of a @ParameterizedTest method (1-based)
+* `{arguments}`: Complete, comma-separated arguments list of the current invocation
+* `{displayName}`: Placeholder for the display name of the test
+* `{0}`, `{1}`, etc.: Individual argument (0-based)
+
+In the example above, the final name for test execution will something like:
+
+[source]
+----
+tested method should return 1 - Result2 when key = key1 and value = 1 are provided
+----
+
+If we provide a parameter using the `org.junit.jupiter.api.Named` class, we can provide a descriptive name
+to the parameter value that will replace the value in the test name.
+
+[source,java]
+----
+@DisplayName("tested method should return ")
+@ParameterizedTest(name = "{index} - {2} when key = {0} and value = {1} are provided")
+@MethodSource
+void methodSourceTest(
+        String providedKey,
+        String providedValue,
+        String expectedResult
+) {
+    // . . .
+}
+
+private static Stream<Arguments> methodSourceTest() {
+    return Stream.of(
+        Arguments.of(Named.of("Sample key 1", "Key1"), 1, Named.of("A sample result 1", "Result1")),
+        Arguments.of(Named.of("Sample key 2", "Key2"), 1, Named.of("A sample result 2", "Result2")),
+        Arguments.of(Named.of("Sample key 3", "Key3"), 1, Named.of("A sample result 3", "Result3"))
+    );
+}
+----
+
+In that case test name will be like this:
+
+[source]
+----
+tested method should return 1 - A sample result 2 when key = Sample key 1 and value = 1 are provided
+----
