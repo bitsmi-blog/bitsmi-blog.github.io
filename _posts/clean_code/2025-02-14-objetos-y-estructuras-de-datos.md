@@ -9,4 +9,4 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
-Objectes and data structures
+Objects and data structures
