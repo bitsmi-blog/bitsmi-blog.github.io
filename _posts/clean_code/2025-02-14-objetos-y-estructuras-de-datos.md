@@ -1,12 +1,12 @@
 ---
 author: Xavier Salvador
-title: 5.- Format
-page_order: 05
-date: 2025-02-12
+title: 6.- Objects and Data Structures
+page_order: 06
+date: 2025-05-14
 categories: [ "clean_code" ]
 tags: [ "clean code" ]
 layout: post
 excerpt_separator: <!--more-->
 ---
 
-Formato
+Objects and data structures
