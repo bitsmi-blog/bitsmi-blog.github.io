@@ -9,8 +9,8 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
-Objects and data structures
-Data abstraction
+
+# Data abstraction
 
 Approaching OOP development we are exposing the implementation.
 public class Point {
@@ -35,7 +35,7 @@ We do not want to expose the details of our data. Rather we want to express our 
 
 The worst option is to blithely add getters and setters.
 
-Data/Object Anti-Symmetry
+# Data/Object Anti-Symmetry
 fundamental dichotomy between objects and data structures
 
 Procedural code (code using data structures) makes it easy to add new functions without changing the existing data structures. OO code, on the other hand, makes it easy to add new classes without changing existing functions.
@@ -63,7 +63,7 @@ A method f of a class C should only call the methods of these:
 
 The method should not invoke methods on objects that are returned by any of the allowed functions. In other words, talk to friends, not to strangers.
 
-Train Wrecks
+# Train Wrecks
 Chains of calls like this are generally considered to be sloppy style and should be avoided.
 Netter follow that approach in the example:
 Options opts = ctxt.getOptions();
@@ -78,14 +78,12 @@ final String outputDir = ctxt.options.scratchDir.absolutePath;
 
 Main reason why is because all the variables used in the accessor line know what is the context of the real call in the line.
 
-Hybrids
+# Hybrids
 This confusion sometimes leads to unfortunate hybrid structures that are half object and half data structure. They have functions that do significant things, and they also have either public variables or public accessors and mutators that, for all intents and purposes, make the private variables public, tempting other external functions to use those variables the way a procedural program would use a data structure.
 
 Avoid creating them.
 
 Hiding Structure
-
-**Resumen en español del fragmento (Capítulo 6, *Clean Code*)**
 
 El autor ilustra el principio de ocultar la estructura interna de los objetos (Ley de Demeter).
 
@@ -117,7 +115,8 @@ El autor ilustra el principio de ocultar la estructura interna de los objetos (L
         * Se favorece un diseño orientado a mensajes (“dile al objeto que haga algo”) en lugar de uno basado en indagar su estado (“pregúntale y hazlo tú”).
 
 **Idea clave**: los objetos deben exponer comportamientos significativos, no sus tripas. Cuando el código externo necesita algo de bajo nivel, plantéate si en realidad solo quiere que “algo suceda”; entonces, delega esa tarea al propio objeto para mantener el encapsulamiento y la claridad del código.
-Data Transfer Objects
+
+# Data Transfer Objects
 The quintessential form of a data structure is a class with public variables and no functions. This is sometimes called a data transfer object, or DTO. DTOs are very useful structures, especially when communicating with databases or parsing messages from sockets, and so on. They often become the first in a series of translation stages that convert raw data in a database into objects in the application code.
 
 The quintessential form of a data structure is a class with public variables and no functions. This is sometimes called a data transfer object, or DTO. DTOs are very useful structures, especially when communicating with databases or parsing messages from sockets, and so on. They often become the first in a series of translation stages that convert raw data in a database into objects in the application code.
@@ -125,6 +124,7 @@ The quintessential form of a data structure is a class with public variables and
 Beans have private variables manipulated by getters and setters. The quasi-encapsulation of beans seems to make some OO purists feel better but usually provides no other benefit.
 
 Bean example
+```java
 public class Address {
 private String street;
 private String streetExtra;
@@ -161,8 +161,9 @@ private String zip;
       return zip;
     }
 }
+```
 
-Active Record
+# Active Record
 Active Records are special forms of DTOs. They are data structures with public (or bean-accessed) variables; but they typically have navigational methods like save and find. Typically these Active Records are direct translations from database tables, or other data sources.
 
 MIxing data structures and objects is not recommended.
@@ -170,7 +171,7 @@ MIxing data structures and objects is not recommended.
 The solution, of course, is to treat the Active Record as a data structure and to create separate objects that contain the business rules and that hide their internal data (which are probably just instances of the Active Record).
 
 
-Conclusion
+# Conclusion
 Objects expose behavior and hide data. This makes it easy to add new kinds of objects without changing existing behaviors. It also makes it hard to add new behaviors to existing objects. Data structures expose data and have no significant behavior. This makes it easy to add new behaviors to existing data structures but makes it hard to add new data structures to existing functions.
 
 In any given system we will sometimes want the flexibility to add new data types, and so we prefer objects for that part of the system. Other times we will want the flexibility to add new behaviors, and so in that part of the system we prefer data types and procedures. Good software developers understand these issues without prejudice and choose the approach that is best for the job at hand.
