@@ -8,7 +8,8 @@ tags: [ "clean code" ]
 layout: post
 excerpt_separator: <!--more-->
 ---
-# Data abstraction
+
+## Data abstraction
 
 Approaching OOP development we are exposing the implementation.
 ```java
@@ -36,7 +37,10 @@ We do not want to expose the details of our data. Rather we want to express our 
 
 _The worst option is to blithely add getters and setters_.
 
-# Data/Object Anti-Symmetry
+<!--more-->
+
+## Data/Object Anti-Symmetry
+
 Fundamental dichotomy between objects and data structures
 
 Procedural code (code using data structures) makes it easy to add new functions without changing the existing data structures. OO code, on the other hand, makes it easy to add new classes without changing existing functions.
@@ -53,15 +57,16 @@ Law of Demeter  says a module should not know about the innards of the objects i
 
 More formal description
 
-_A method f of a class C should only call the methods of these_:
-1. C
-2. An object created by f
-3. An object passed as an argument to f
-4. An object held in an instance variable of C
+_A method `f` of a class `C` should only call the methods of these_:
+1. `C`
+2. An object created by `f`
+3. An object passed as an argument to `f`
+4. An object held in an instance variable of `C`
 
 The method should not invoke methods on objects that are returned by any of the allowed functions. In other words, talk to friends, not to strangers.
 
-# Train Wrecks
+## Train Wrecks
+
 Better follow chains of calls that approach in the example:
 ```java
 Options opts = ctxt.getOptions();
@@ -77,14 +82,15 @@ final String outputDir = ctxt.options.scratchDir.absolutePath;
 ```
 Main reason why is because all the variables used in the accessor line know what is the context of the real call in the line.
 
-# Hybrids
+## Hybrids
+
 This confusion sometimes leads to unfortunate hybrid structures that are half object and half data structure. 
 
 They have functions that do significant things, and they also have either public variables or public accessors and mutators that, for all intents and purposes, make the private variables public, tempting other external functions to use those variables the way a procedural program would use a data structure.
 
 Avoid creating them.
 
-# Hiding Structure
+## Hiding Structure
 
 The author illustrates the principle of hiding the internal structure of objects (Law of Demeter).
 
@@ -122,7 +128,8 @@ The author illustrates the principle of hiding the internal structure of objects
 **Key Idea**: objects should expose meaningful behaviors, not their guts. 
 When external code needs something low-level, consider whether it really just wants “something to happen”; if so, delegate that task to the object itself to preserve encapsulation and code clarity.
 
-# Data Transfer Objects
+## Data Transfer Objects
+
 The quintessential form of a data structure is a class with public variables and no functions. 
 
 This is sometimes called a data transfer object, or DTO. DTOs are very useful structures, especially when communicating with databases or parsing messages from sockets, and so on. 
@@ -173,7 +180,8 @@ private String zip;
 }
 ```
 
-# Active Record
+## Active Record
+
 **Active Records** are special forms of DTOs. 
 
 They are data structures with public (or bean-accessed) variables; but they typically have navigational methods like save and find. 
@@ -185,7 +193,8 @@ Mixing data structures and objects is not recommended.
 The solution, of course, is to treat the **Active Record** as a data structure and to create separate objects that contain the business rules and that hide their internal data (which are probably just instances of the **Active Record**).
 
 
-# Conclusion
+## Conclusion
+
 Objects expose behavior and hide data. 
 
 This makes it easy to add new kinds of objects without changing existing behaviors - it also makes it hard to add new behaviors to existing objects. 
