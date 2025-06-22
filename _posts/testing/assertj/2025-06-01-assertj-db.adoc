@@ -1,0 +1,279 @@
+---
+author: Antonio Archilla
+title: Assertj-DB
+date: 2025-06-01
+categories: [ "testing", "assertj" ]
+tags: [ "assertj", "assertj-db" ]
+layout: post
+excerpt_separator: <!--more-->
+---
+
+:assertj_url: https://github.com/assertj/assertj
+:assertj_db_doc_url: https://assertj.github.io/doc/#assertj-db
+
+== Introduction
+
+{assertj_url}[**Assertj**] is a popular Java library that provides useful testing assertions that can be used in test implementations
+with **Junit**, **TestNG** or any other testing library.
+
+Along with **Assertj Core**, that implement general purpose assertions, 
+**Asserj** provides other useful modules that provide assertions to be used with data structures provided by other technologies, like **Neo4J**, **Joda Time**, **Guava**...
+
+This guide is focused on the {assertj_db_doc_url}[Assertj-DB] module that provides assertions to access a DB and check directly the data stored inside.
+
+To start using **Assertj-db** it is needed to add the following dependency to the project
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.assertj</groupId>
+  <artifactId>assertj-db</artifactId>
+  <version>3.0.0</version>
+  <scope>test</scope>
+</dependency>
+----
+
+`3.0.0` is the last version published at the time of writing this guide. It also includes the `assertj-core` module dependency.
+
+// <!--more-->
+
+== Connection
+
+To make use of the assertions provided by the library on the database data, first of all we need to configure a `AssertDbConnection`.
+
+For simple tests through JDBC statements, it is enough to configure it using the **connection URL**:
+
+[source,java]
+----
+AssertDbConnection connection = AssertDbConnectionFactory.of("jdbc:h2:mem:test", "sa", "").create();
+---- 
+
+Or if we have a `javax.sql.DataSource` available:
+
+[source,java]
+----
+AssertDbConnection connection = AssertDbConnectionFactory.of(dataSource).create();
+----
+
+For **Spring JPA** tests involving transactions is a bit more tricky since we need that the connection obtained by **Assertj-db** is the one involved in the transaction. 
+For that reason, we need to use a *proxy*:
+
+[source,java]
+----
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+
+// . . .
+
+private AssertDbConnection connection;
+
+@BeforeEach
+void setUp() {
+	/* It is needed to wrap dataSource to allow access to current transaction connection.
+	 * Otherwise, <code>AssertDbConnection</code> won't be allowed to access uncommitted changes
+	 */
+	connection = AssertDbConnectionFactory.of(new TransactionAwareDataSourceProxy(dataSource))
+			.create();
+}
+----
+
+== APIs
+
+After that, we can make use of the different APIs that the library provide us to assert the data stored in the database. We can access data in three ways:
+
+=== Table API
+
+We can access directly a table and inspect its rows:
+
+[source,java]
+----
+import static org.assertj.db.api.Assertions.assertThat;
+
+// . . .
+
+final LocalDateTime referenceDateTime = LocalDateTime.now();
+
+Table productTable = connection.table("PRODUCT").build();
+assertThat(productTable)
+    .hasNumberOfRows(6)
+    .row(0)
+        .value("ID").isNotNull()
+        .value("VERSION").isNotNull()
+        .value("EXTERNAL_ID").isEqualTo("test-product")
+        .value("NAME").isEqualTo("Test product")
+        .value("CATEGORY_ID").isEqualTo(1001L)
+        .value("CREATION_DATE").isAfter(DateTimeValue.from(referenceDateTime))
+        .value("LAST_UPDATED").isAfter(DateTimeValue.from(referenceDateTime));
+----
+
+In this example we assert that the table has exactly a number of rows and that the values of the first one are
+the ones that we expect.
+
+It is also possible to inspect a single column values using the `column()` selector:
+
+[source,java]
+----
+Table productTable = connection.table("PRODUCT").build();
+assertThat(productTable)
+    .column("EXTERNAL_ID")
+        .hasValues("product-1.1", "product-1.2", "product-2.1", "product-2.2", "product-3.1")
+    .column("NAME")
+        .hasValues("Product 1.1", "Product 1.2", "Product 2.1", "Product 2.2", "Product 3.1");
+----
+
+=== Request API
+
+If we need to data involving multiple tables, we can inspect a specific set of data using a `Request` with a query:
+
+[source,java]
+----
+Request request = connection.request("""
+        select p.EXTERNAL_ID as PROD_EXTID, c.EXTERNAL_ID as CAT_EXTID
+        from PRODUCT p, CATEGORY c
+        where p.CATEGORY_ID = c.ID
+            and p.id = ?
+        """)
+        .parameters(1001L)
+        .build();
+assertThat(request)
+        .hasNumberOfRows(1)
+        .column("PROD_EXTID")
+            .hasValues("product-1.1")
+        .column("CAT_EXTID")
+            .hasValues("category-1");
+----
+
+=== Changes API
+
+When the test requires insert, update or delete data from the database, we can use the **changes API**
+as it allows to assert specifically the changed data. To do that, we need to mark a checkpoint before and after
+the changes are made to  the database using the methods `setStartPointNow()` and `setEndPointNow()`
+after obtaining a `Changes` instance that we will use in the assertions
+
+[source,java]
+----
+final Changes changes = connection.changes().build();
+changes.setStartPointNow();
+
+// Do some modifications
+
+changes.setEndPointNow();
+
+assertThat(changes)
+    .hasNumberOfChanges(1) <.>
+    .onTable("PRODUCT") <.>
+        .hasNumberOfChanges(1)
+        .changeOfCreation() <.>
+            .rowAtEndPoint() <.>
+                .value("ID").isNotNull()
+                .value("VERSION").isNotNull()
+                .value("EXTERNAL_ID").isEqualTo("test-product")
+                .value("NAME").isEqualTo("Test product")
+                .value("CATEGORY_ID").isEqualTo(1001L)
+                .value("CREATION_DATE").isAfter(DateTimeValue.from(referenceDateTime))
+                .value("LAST_UPDATED").isAfter(DateTimeValue.from(referenceDateTime));
+----
+<.> We can check the total number of changes made in the database
+<.> Or the number of changes in a specific table
+<.> It is possible to also discriminate by change type (`changeOfCreation()`, `changeOfModification()` or `changeOfDeletion()`)
+<.> And then check the data after the change
+
+== Note about using Assertj-DB in Spring JPA tests
+
+When it is needed to assert database changes made by **Spring JPA** repositories, or generalizing, made with an ORM like **Hibernate**
+we have to take into consideration when the changes are available to be read by the assert statements. As we said previously,
+if we have an uncommited transaction, the used connection should be the same involved in the transaction and in case of using a ORM
+the entity manager must have flushed changes. In this example we show an example of the whole case of make changes through a **Spring JPA**
+repository and assert these changes using `Assertj-DB`
+
+[source,java]
+----
+import jakarta.persistence.EntityManager;
+import javax.sql.DataSource;
+import org.assertj.db.type.AssertDbConnection;
+import org.assertj.db.type.AssertDbConnectionFactory;
+
+// . . .
+
+@Autowired
+private DataSource dataSource;
+@Autowired
+private EntityManager entityManager;
+
+@Autowired
+private ProductRepository productRepository;
+@Autowired
+private CategoryRepository categoryRepository;
+
+private AssertDbConnection connection;
+
+@BeforeEach
+void setUp() {
+    /* It is needed to wrap datasource to allow access to current transaction connection.
+     * Otherwise, <code>AssertDbConnection</code> won't be allowed to access uncommited changes
+     */
+    connection = AssertDbConnectionFactory.of(new TransactionAwareDataSourceProxy(dataSource))
+            .create();
+}
+
+@Test
+@DisplayName("Check an inserted row using change API")
+@Transactional
+void changeApiTest1() {
+    final LocalDateTime referenceDateTime = LocalDateTime.now();
+
+    final Changes changes = connection.changes().build();
+    changes.setStartPointNow();
+
+    CategoryEntity categoryEntity = categoryRepository.findById(1001L)
+            .orElseThrow();
+    ProductEntity productEntity = ProductEntity.builder()
+            .externalId("test-product")
+            .name("Test product")
+            .category(categoryEntity)
+            .build();
+    productRepository.save(productEntity); <.>
+
+    entityManager.flush(); <.>
+    changes.setEndPointNow();
+
+    assertThat(changes)
+        .hasNumberOfChanges(1)
+        .onTable("PRODUCT")
+            .hasNumberOfChanges(1)
+            .changeOfCreation()
+                .rowAtEndPoint()
+                    .value("ID").isNotNull()
+                    .value("VERSION").isNotNull()
+                    .value("EXTERNAL_ID").isEqualTo("test-product")
+                    .value("NAME").isEqualTo("Test product")
+                    .value("CATEGORY_ID").isEqualTo(1001L)
+                    .value("CREATION_DATE").isAfter(DateTimeValue.from(referenceDateTime))
+                    .value("LAST_UPDATED").isAfter(DateTimeValue.from(referenceDateTime));
+}
+----
+<.> Do some changes in the database
+<.> Flush those changes so they are visible when the assertions are executed
+
+== DateValue, TimeValue and DateTimeValue
+
+Since **2.0.0**, **AssertJ-DB** baseline is Java 8. The preferred way to compare values with date, time and date/time is to use `java.time.LocalDate`, `java.time.LocalTime`, `java.time.LocalDateTime` directly.
+
+For the backward compatibility, it’s always possible to use **AssertJ-DB** `DateValue`, `TimeValue` and `DateTimeValue` utilities:
+
+[source,java]
+----
+final LocalDateTime referenceDateTime = LocalDateTime.now();
+
+Table productTable = connection.table("PRODUCT").build();
+assertThat(productTable)
+    .row(0)
+    // . . .
+    .value("CREATION_DATE").isAfter(DateTimeValue.from(referenceDateTime)) <.>
+    .value("LAST_UPDATED").isAfter(DateTimeValue.from(referenceDateTime));
+----
+<.> Timestamp columns are compared using Java's `LocalDateTime` through `DateTimeValue` utility class
+
+== References
+
+- {assertj_url}[Assertj GitHub repository]
+- {assertj_db_doc_url}[Assertj-DB home page]

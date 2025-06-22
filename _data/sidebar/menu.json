@@ -79,6 +79,10 @@
 		"title": "Testing",
 		"children": [
 			{
+				"title": "Assertj",
+				"url": "/pages/testing/assertj/"
+			},
+			{
 				"title": "JUnit",
 				"url": "/pages/testing/junit/"
 			},

@@ -278,6 +278,24 @@ By default, only level 1 (==) and 2 (===) section titles are displayed. This can
 
 ----
 
+=== Variables
+
+Variables can be defined and reused across the document.
+
+Define a key - value pair at the top of the document using `:<key>:<value>` syntax and use it at any part of the document enclosing as `{key}`. 
+For example, to define a URL variable used later in a link:
+
+[source:asciidoc]
+----
+= Page title
+
+:foo_url: https://www.foo.com
+
+// . . .
+
+{foo_url}[Foo page link]
+----
+
 == Text format
 
 === Highlight
