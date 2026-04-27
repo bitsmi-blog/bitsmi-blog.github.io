@@ -1,4 +1,4 @@
----
+﻿---
 author: Xavier Salvador
 title: 3.- Functions
 page_order: 03
@@ -9,259 +9,166 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
-Small
--------
-* Functions max up to 20 lines.
-* Always small.
-* They are the main line of organization in any program.
+## Overview
+
+Functions are the first line of organisation in any program. This chapter describes what makes a function clean: how small it should be, what it should do, how many arguments it should take, and how it should handle errors.
 
 <!--more-->
 
-Blocks and Indenting
--------------------------
-**If, else, while** statements up to one line long as a function call.
+## Small
 
-Following that approach together with the name of the function  we are also adding documentary value because the function called within the block can have a nicely descriptive name.
+- Functions should be small — at most 20 lines, and usually much shorter.
+- They are the main unit of organisation in a program.
 
-The indent level of a function **should not be greater than one or two** tabs making the functions easier to read and understand.
+## Blocks and Indenting
 
-Do one thing
----------------
-Three main rules about functions which
-- Should do **one thing**.
-- Should do it well.
-- Should do it only.
+`if`, `else`, and `while` blocks should be one line long — ideally a function call. This keeps the function short and adds documentary value through the name of the called function. The indent level of a function should not be greater than one or two levels.
 
-**Question**: _How do we know what **one thing** is?_
+## Do One Thing
 
-**Technique**
-*We can check if a function is doing more than **one thing** if we can extract another function from it without being a restatement.*
+Functions should:
+- Do **one thing**.
+- Do it well.
+- Do it only.
 
-Sections Within Functions
--------------------------------
-Functions that do **one thing** cannot be reasonably divided into sections.
+**How to check**: if you can extract another function from it without it being a mere restatement of the implementation, the original function is doing more than one thing.
 
-* One level of Abstraction per Function
-  In order to make sure our functions are doing **one thing**,” we need to make sure that the statements within our function are all at the same level of abstraction.
+## Sections Within Functions
 
-You can find several levels of abstraction: **high, intermediate and low**. Question here is that mixing levels of abstraction within a function is always confusing.
+A function that does one thing cannot be reasonably divided into sections. Sections are a sign that the function is doing more than one thing.
 
-The hard exercise here consists in the action of distinguishing what is an essential concept and what is a detail. 
+## One Level of Abstraction per Function
 
-Once mixed, more and more details tend to accrete within the function, so we lose the **one thing** rule applied in the function.
+All statements in a function should be at the same level of abstraction. Mixing high-level concepts with low-level details in the same function is always confusing, and tends to attract more details over time.
 
-Reading code from Top to Bottom: The Stepdown rule
-----------------------------------------------------------------
-Code must be read following the top-down narrative through  **The Step-down** rule:
+## Reading Code from Top to Bottom: The Stepdown Rule
 
->We want every function to be followed by those at the next level of abstraction so that we can read the program, descending one level of abstraction at a time as we read down the list of functions.
+Code should read like a top-down narrative. Every function should be followed by those at the next level of abstraction so the program can be read descending one level at a time. This is the **Step-down Rule**.
 
-It turns out to be very difficult for programmers to learn to follow this rule and write functions that stay at a single level of abstraction. 
+Making code read like a set of TO paragraphs is an effective technique for keeping abstraction levels consistent.
 
-But learning this trick is also very important. It is the key to keeping functions short and making sure they do **one thing**. 
+## Switch Statements
 
-Making the code read like a top-down set of TO paragraphs is an effective technique for keeping the abstraction level consistent.
+By their nature, switch statements always do N things. They cannot be made to do only one thing. The rule is:
 
-Switch statements
-----------------------
-By their nature, switch statements always do N things.
+- Bury switch statements in the basement of an **Abstract Factory** — never let anything else see them.
+- Use the switch to create polymorphic objects; dispatch behaviour through interfaces or abstract classes.
+- **One switch per type selection** — no repeated switch on the same type elsewhere in the system.
 
-We can't avoid the use of switch statements of course, but we can make sure that each statement is buried in a low-level class and is never repeated.
-**How**? _Through polymorphism._
-
-As a general rule, we prefer polymorphism to switch/case through the **one switch** rule.
-
-There may be no more than **one switch** statement for a given type of selection. 
-
-The cases in that switch statement must create polymorphic objects that take the place of other such switch statements in the rest of the system.
-
-Example
-``` java
-// Original function
+```java
+// Bad: switch exposed, violates SRP and OCP
 public Money calculatePay(Employee e) throws InvalidEmployeeType {
     switch (e.type) {
-              case COMMISSIONED:
-    return calculateCommissionedPay(e);
-              case HOURLY:
-    return calculateHourlyPay(e);
-              case SALARIED:
-    return calculateSalariedPay(e);
-    default:
-              throw new InvalidEmployeeType(e.type);
+        case COMMISSIONED: return calculateCommissionedPay(e);
+        case HOURLY:       return calculateHourlyPay(e);
+        case SALARIED:     return calculateSalariedPay(e);
+        default:           throw new InvalidEmployeeType(e.type);
     }
 }
-```
-There are several problems with this function.
-- First, it’s large, and when new employee types are added, it will grow.
-- Second, it very clearly does more than **one thing**.
-- Third, it violates the **Single Responsibility Principle (SRP)** because there is more than one reason for it to change.
-- Fourth, it violates the **Open Closed Principle8 (OCP)** because it must change whenever new types are added.
 
-But possibly the worst problem with this function is that there are an <u>unlimited number of other functions</u> that will have the same structure depending on the employee type .
-``` java
+// Good: switch hidden in factory; behaviour dispatched polymorphically
 public abstract class Employee {
     public abstract boolean isPayday();
     public abstract Money calculatePay();
     public abstract void deliverPay(Money pay);
 }
 
-public interface EmployeeFactory {
-    public Employee makeEmployee(EmployeeRecord r) throws InvalidEmployeeType;
-}
-
 public class EmployeeFactoryImpl implements EmployeeFactory {
     public Employee makeEmployee(EmployeeRecord r) throws InvalidEmployeeType {
         switch (r.type) {
-            case COMMISSIONED:
-                return new CommissionedEmployee(r);
-            case HOURLY:
-                return new HourlyEmployee(r);
-            case SALARIED:
-                return new SalariedEmployee(r); // Corregido "SalariedEmploye" a "SalariedEmployee"
-            default:
-                throw new InvalidEmployeeType(r.type);
+            case COMMISSIONED: return new CommissionedEmployee(r);
+            case HOURLY:       return new HourlyEmployee(r);
+            case SALARIED:     return new SalariedEmployee(r);
+            default:           throw new InvalidEmployeeType(r.type);
         }
     }
 }
 ```
-The **solution** to this problem is to bury the switch statement in the basement of an **ABSTRACT FACTORY** and never let anyone see it. 
 
-The factory will use the switch statement to create appropriate instances of the derivatives of **Employee**, and the various functions, such as **calculatePay**, **isPayday**, and **deliverPay**, will be dispatched polymorphically through the **Employee** interface.
+## Use Descriptive Names
 
-Use descriptive names
----------------------------
-Names must describe what the function is doing.
+- Do not be afraid to make a name long — a long descriptive name is better than a short enigmatic one.
+- Spend time choosing a name; try several alternatives.
+- Use the same phrases, nouns, and verbs consistently across function names in a module.
 
-Three main rules:
-* Don’t be afraid to make a name long.
-* Don’t be afraid to spend time choosing a name.
-* Be consistent in your names. Use the same phrases, nouns, and verbs in the function names you choose for your modules
+## Function Arguments
 
-Function arguments
-------------------------
-The ideal number of arguments (ordinal)
-1. Niladic.
-2. Monadic.
-3. Dyadic.
-4. Triadic.
-5. Polyadic.
+Preferred number of arguments (in order):
+1. **Niladic** — zero (ideal)
+2. **Monadic** — one (good)
+3. **Dyadic** — two (acceptable)
+4. **Triadic** — three (requires justification)
+5. **Polyadic** — four or more (avoid)
 
-**3 and x** must never be used and they require a special justification to be used.
+Arguments make functions harder to read and harder to test (more combinations to cover).
 
-Arguments are hard so the best approach with them is to try to remove from them as much of conceptual power as we can.
+### Common Monadic Forms
 
-It makes it easy to read the function and the arguments.
+Two valid reasons to pass a single argument:
+1. Asking a question about the argument: `boolean isFileValid(File f)`
+2. Transforming the argument and returning the result: `InputStream openFile(String path)`
 
-Arguments are even harders from a testing point of view. 
+### Flag Arguments
 
-Main reason why is that it is very difficult to write all the test cases to ensure that all combinations of arguments are working properly. 
+Passing a boolean flag to a function is a bad practice. It proclaims that the function does two things — one for `true`, one for `false`. Split the function instead.
 
-The more arguments we have, the more difficult it is to create the testing.
+### Dyadic Functions
 
-Common monadic forms
-------------------------------
-There are two very common reasons to pass a single argument into a function:
-1. You may be asking a question about that argument, as in a boolean method
-2. You may be operating on that argument, transforming it into something else and returning it.
+Two-argument functions are harder to read. The first argument tends to be absorbed and the second ignored. When possible, convert a dyadic function to a monadic one. Some cases legitimately require two arguments: `new Point(x, y)`.
 
-**Uncle Bob** recommends choosing names that make the distinction clear, and always use the two forms in a consistent context.
+### Triads
 
-Flag arguments
-------------------
-Passing flag arguments to a method is **a bad practice**. 
+Harder than dyadic. Most triads can be avoided by wrapping arguments into an object.
 
-For example, booleans from the perspective of the **one thing** rule mentioned before are not fitting this rule because this function with the boolean as an argument is doing two things:
-1. **One thing** if the flag is true.
-2. Another thing if the flag is false.
+### Argument Objects
 
-Dyadic functions
----------------------
-When we have two arguments in a method we tend to clearly see the first one, keeping its meaning without problems but when we try to read the second argument, we require a short pause until we learn to ignore the first argument.
+When a function needs more than two or three arguments, some of those arguments should be wrapped in a class:
 
-Best approach to follow is to try to transform a **Dyadic Function into a Monadic function**.
+```java
+// Polyadic — hard to read
+Circle makeCircle(double x, double y, double radius);
 
-Despite that, there are times when this function is needed in reality.
-
-Example
-``` java
-Point p = new Point(0,0);
-```
-Cartesian points always have two points so this specific case fits in the use of a Dyadic function.
-
-Triads
---------
-**These functions are harder than Dyadic**. Main issues related to ordering, pausing, and ignoring are more than doubled.
-
-As the Dyadic functions there is one specific case that can fit into this kind of functions.
-Example
-``` java
-assertEquals(1.0, amount, .001).
+// Dyadic — cleaner
+Circle makeCircle(Point center, double radius);
 ```
 
-It’s always good to be reminded that equality of floating point values is a relative thing.
+### Argument Lists
 
-Argument Objects
-----------------------
-Reducing the number of arguments by creating objects out of them may seem like cheating, but it’s not.
+Variable argument lists (`Object... args`) are treated as a single argument of type `List` for arity purposes.
 
-Argument Lists
-------------------
-Sometimes we want to pass a variable number of arguments into a function.
+## Have No Side Effects
 
-If the variable arguments are treated identically, they are equivalent to a single argument of type List. So this example is a **Dyadic** function
-``` java
-public String format(String format, Object... args);
-``` 
+A function that promises to do one thing but secretly does something else (modifies a global, changes a parameter, calls an unrelated method) is a lie. Side effects create temporal couplings and hidden dependencies.
 
-Same approach can be followed for monad and triad functions like
-``` java
-void monad(Integer… args);
-void dyad(String name, Integer… args);
-void triad(String name, int count, Integer… args);
-but adding more will be a huge mistake.
-```
+## Output Arguments
 
-Have no side effects
-------------------------
-When we want a function to follow the **one thing** rule, we also want to **avoid possible hidden things**: doing two more calls to other methods or doing more things than the only expected one.
+Output arguments (where the function modifies a passed-in object instead of returning a result) are confusing. In OO code, `this` is the natural output argument — if state must change, change the state of the owning object.
 
-Output arguments
-----------------------
-Arguments are most naturally interpreted as inputs to a function.
+## Command Query Separation
 
-In general, output arguments should be avoided. If your function must change the state of something, it has to change the state of its owning object.
+**Functions should either do something or answer something — not both.**
 
-Why? In the days before object-oriented programming it was sometimes necessary to have output arguments. 
+Combining a command and a query in one function creates ambiguity. Separate commands from queries.
 
-However, much of the need for output arguments disappears in OO languages because this is intended to act as an output argument.
+## Prefer Exceptions to Returning Error Codes
 
-Command Query Separation
-----------------------------------
-**Functions should either do something or answer something but not the two actions at the same time**.
+Using exceptions instead of error codes separates the happy path from error handling:
 
-**Important** point here is to remove ambiguity as much as we can.
-
-Prefer Exceptions to  returning  error codes
----------------------------------------------------
-**Using exceptions instead of returned error codes**, then the error processing code can be separated from the happy path code and can be simplified:
-``` java
+```java
 try {
-      deletePage(page);
-      registry.deleteReference(page.name);
-      configKeys.deleteKey(page.name.makeKey());
+    deletePage(page);
+    registry.deleteReference(page.name);
+    configKeys.deleteKey(page.name.makeKey());
 } catch (Exception e) {
-      logger.log(e.getMessage());
+    logger.log(e.getMessage());
 }
 ```
 
-Extract Try/Catch blocks
------------------------------
-The way to do that is to encapsulate the whole logic found inside the try in a private function, and use this reference explicitly inside the try.
+## Extract Try/Catch Blocks
 
-Try and catch blocks they will only contain the reference of this new private function.
+The body of `try` and `catch` blocks should be extracted into their own functions. This keeps error handling and normal processing separate and readable:
 
-As an example from section Prefer Exceptions to  returning  error codes.
-``` java
+```java
 public void delete(Page page) {
     try {
         deletePageAndAllReferences(page);
@@ -281,26 +188,39 @@ private void logError(Exception e) {
 }
 ```
 
-Error handling is also only one thing
---------------------------------------------
-Error handling is only **one thing** too so a function that handles errors should not do anything else.
+## Error Handling Is One Thing
 
-The Error.java Dependency Magnet
--------------------------------------------
-As a standard approach programmers tend to manage an enum containing the errors that are defined.
-``` java
+A function that handles errors should do nothing else. If the keyword `try` appears in a function, it should be the first word — and there should be nothing after the `catch`/`finally` blocks.
+
+## The Error.java Dependency Magnet
+
+Using a shared `Error` enum forces every class that uses errors to import and depend on it. When the enum changes, all dependent classes must be recompiled and redeployed.
+
+```java
 public enum Error {
-        OK,
-        INVALID,
-        NO_SUCH,
-        LOCKED,
-        OUT_OF_RESOURCES,
-        WAITING_FOR_EVENT;
+    OK, INVALID, NO_SUCH, LOCKED, OUT_OF_RESOURCES, WAITING_FOR_EVENT;
 }
 ```
 
-These classes are called  **_dependency magnet_**: the main reason why it is because a lot of classes must use these errors.
+When you use exceptions rather than error codes, new exceptions are derivatives of the exception class and can be added without forcing any recompilation or redeployment.
 
-If new errors appear, it is needed too to change the current enum so new deployments are required too.
+## Don't Repeat Yourself (DRY)
 
-When you use exceptions rather than error codes, then new exceptions are derivatives
+Duplication is the root of all evil in software. When the same algorithm appears in multiple places, any change to it requires changes in every copy — and it is easy to miss one. Identify duplication, extract it into a function, and call that function from all the places that need it.
+
+## Quick Reference
+
+| Principle | Guidance |
+|-----------|----------|
+| Small | Max ~20 lines; usually much shorter |
+| Do one thing | Can you extract another function? Then it does too much |
+| One abstraction level | All statements at the same level |
+| Stepdown rule | Read top to bottom, descending one abstraction level at a time |
+| Switch | Bury in factory; use polymorphism everywhere else |
+| Arguments | 0-1 preferred; 2 acceptable; 3 requires justification; 4+ avoid |
+| No flag args | Split the function instead |
+| No side effects | Functions should do exactly what they say |
+| CQS | Either do or answer — never both |
+| Exceptions > error codes | Exceptions decouple error handling from happy path |
+| Extract try/catch | Error handling and logic in separate functions |
+| DRY | No duplicated algorithms; extract and reuse |
