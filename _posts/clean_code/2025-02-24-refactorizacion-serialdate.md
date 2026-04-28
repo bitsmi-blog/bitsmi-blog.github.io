@@ -9,165 +9,103 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
+El capítulo 16 es un caso de estudio sobre la clase `org.jfree.date.SerialDate` de la librería JCommon. El autor primero la hace funcionar correctamente y luego la refactoriza en profundidad, aplicando un amplio catálogo de heurísticas de código limpio.
+
 <!--more-->
 
-# SerialDate refactor
+## Primer paso: hacer que funcione
 
-This short consultancy-style note describes a pragmatic, test-driven approach to refactoring a legacy SerialDate class (a mutable, old-style date utility often found in legacy codebases) into a clear, well-factored, and modern API. The focus is on preserving behavior, reducing surprises, and making incremental, reviewable changes.
+Al ejecutar los tests existentes contra `SerialDate`, varios fallan. El análisis revela dos problemas:
 
-## Problem summary
+- Un error de límite en `getFollowingDayOfWeek`: la condición de ajuste era incorrecta para ciertos días de la semana.
+- Los métodos `weekInMonthToString` y `relativeToString` devolvían strings de error en lugar de lanzar `IllegalArgumentException`.
 
-Legacy code often contains a class named `SerialDate` (or similar) that mixes parsing, formatting, arithmetic, mutability, and sometimes global state. Common issues:
+Tras corregir estos errores, todos los tests de JCommon pasan.
 
-- Mutable internal state that leaks across callers.
-- Use of integers or magic fields for year/month/day instead of a dedicated value object.
-- Tight coupling to formatting or to legacy libraries.
-- Implicit assumptions about time zones or locales.
-- Poor test coverage or brittle tests that make refactor risky.
+## Segundo paso: hacerlo bien
 
-These problems lead to bugs, fragile code, and a high cost for safe changes.
+A continuación, se recorre la clase de arriba a abajo aplicando mejoras.
 
-## Goals for the refactor
+### Eliminar el historial de cambios [C1]
 
-- Preserve existing externally observable behavior (backwards compatibility) where required.
-- Make date values immutable and explicit.
-- Replace or adapt to java.time types where practical.
-- Move parsing/formatting and I/O concerns out of the core value object.
-- Provide a clear migration path for callers with minimal disruption.
-- Add characterization tests before changing behavior.
+El largo bloque de comentarios con historial de versiones es un vestigio del pasado. Los sistemas de control de versiones modernos ya almacenan esa información.
 
-## A pragmatic, safe plan (step-by-step)
+### Renombrar `SerialDate` → `DayDate` [N1, N2]
 
-1. Characterize current behavior with tests.
-   - Write characterization tests that capture current inputs/outputs, edge cases, and rounding/rollover behavior.
-   - If the project lacks unit tests, add a focused test suite that exercises parsing, arithmetic, comparisons, and equality.
+El nombre "SerialDate" describe una implementación concreta (representación por número serial), pero la clase es abstracta. Un nombre abstracto como `DayDate` es más apropiado para una clase base.
 
-2. Identify responsibilities and create a small design.
-   - Split responsibilities: Value (date arithmetic & comparison) vs. Formatting/Parsing vs. Adapters/Legacy API.
-   - Sketch minimal interfaces: SerialDateValue (immutable), SerialDateParser, SerialDateFormatter, SerialDateAdapter.
+### Reemplazar `MonthConstants` por un enum `Month` [J2]
 
-3. Implement an immutable value object.
-   - Create a new `ImmutableSerialDate` (or `SerialLocalDate`) that wraps `java.time.LocalDate` or that stores final fields (year, month, day).
-   - Implement equals/hashCode/toString and the arithmetic/compare operations.
-   - Keep the constructor package-private if you want to force creation through factories.
-
-4. Add adapters for legacy callers.
-   - Implement `SerialDateAdapter` that delegates to the new immutable implementation but preserves the old mutable API by forwarding calls.
-   - Mark adapter methods as @Deprecated if you plan to remove them later.
-
-5. Replace usage incrementally.
-   - Start by wiring a subset of callers to use the immutable type (new code paths, or tests), leaving adapters in place for risky or large modules.
-   - Keep characterization tests green during the transition.
-
-6. Remove legacy surface once callers are migrated.
-   - When confident, either remove the old mutable class or shrink it to a thin wrapper around the new type.
-
-## Tests-first: characterization tests (examples)
-
-Before changing implementation, add tests that capture current behavior. Example assertions to add:
-
-- Parsing of all supported formats (including odd legacy ones).
-- Arithmetic: addDays, rollMonth, leap-year behavior.
-- Comparisons: equals, before/after edge cases.
-- Serialization/formatting hooks used by other systems.
-
-These tests are not assertions of ideal design; they record what the system currently does so you don't change behavior unintentionally.
-
-## Code: before and after (illustrative Java snippets)
-
-Before (typical legacy mutable API):
+Heredar de una interfaz para obtener constantes es un mal truco de Java. Se reemplaza con un enum propio:
 
 ```java
-// ...legacy SerialDate (simplified)
-public class SerialDate {
-    private int year;
-    private int month; // 1-12
-    private int day;
-
-    public SerialDate(int y, int m, int d) { this.year = y; this.month = m; this.day = d; }
-    public void addDays(int n) { /* mutates fields with complex logic */ }
-    public boolean before(SerialDate other) { /* compare fields */ }
-    public String format(String pattern) { /* formatting logic here */ }
-    // lots of other mutable convenience methods
+public static enum Month {
+    JANUARY(1), FEBRUARY(2), ..., DECEMBER(12);
+    public final int index;
+    public static Month make(int monthIndex) { ... }
 }
 ```
 
-After (immutable value + adapter):
+Esto elimina `isValidMonthCode` y toda la validación manual de códigos de mes [G5].
+
+### Convertir otros conjuntos de constantes en enums [J3]
+
+- `WeekInMonth`: FIRST, SECOND, THIRD, FOURTH, LAST
+- `DateInterval`: CLOSED, CLOSED_LEFT, CLOSED_RIGHT, OPEN (nomenclatura matemática más clara [N3])
+- `WeekdayRange`: LAST, NEXT, NEAREST
+
+### Mover constantes al nivel correcto [G6]
+
+`EARLIEST_DATE_ORDINAL` y `LATEST_DATE_ORDINAL` solo los usa `SpreadsheetDate`, así que se mueven allí. `MINIMUM_YEAR_SUPPORTED` y `MAXIMUM_YEAR_SUPPORTED` también se desplazan a la subclase.
+
+### Introducir `DayDateFactory` [G7]
+
+Una clase base no debe conocer a sus derivadas. Se introduce el patrón ABSTRACT FACTORY:
 
 ```java
-// Immutable value object that uses java.time under the hood
-public final class SerialLocalDate {
-    private final java.time.LocalDate date;
-
-    private SerialLocalDate(java.time.LocalDate date) { this.date = date; }
-
-    public static SerialLocalDate of(int year, int month, int day) {
-        return new SerialLocalDate(java.time.LocalDate.of(year, month, day));
-    }
-
-    public SerialLocalDate plusDays(long days) { return new SerialLocalDate(date.plusDays(days)); }
-
-    public boolean isBefore(SerialLocalDate other) { return this.date.isBefore(other.date); }
-
-    public int getYear() { return date.getYear(); }
-    // equals/hashCode/toString delegate to date
-}
-
-// Adapter to preserve old mutable API while delegating
-@Deprecated
-public class SerialDateAdapter {
-    private SerialLocalDate value;
-
-    public SerialDateAdapter(int y, int m, int d) { this.value = SerialLocalDate.of(y, m, d); }
-
-    public void addDays(int n) { this.value = this.value.plusDays(n); }
-
-    public boolean before(SerialDateAdapter other) { return this.value.isBefore(other.value); }
-
-    public SerialLocalDate toValue() { return value; }
+public abstract class DayDateFactory {
+    private static DayDateFactory factory = new SpreadsheetDateFactory();
+    public static DayDate makeDate(int ordinal) { return factory._makeDate(ordinal); }
+    public static int getMinimumYear()          { return factory._getMinimumYear(); }
+    // ...
 }
 ```
 
-Notes:
-- The adapter preserves behavior but delegates to immutable operations. This makes it easy to unit-test the new type and slowly migrate callers.
-- Prefer `java.time` for correctness around leap years, months, and other well-known pitfalls.
+### Extraer `Day` a su propio fichero [G13]
 
-## Migration strategy and safety nets
+El enum `Day` es suficientemente grande e independiente de `DayDate` como para vivir en su propio fichero fuente.
 
-- Keep both implementations in the codebase during migration. Use the adapter to bridge surfaces.
-- Add feature flags or small integration tests around modules that consume `SerialDate` to detect differences early.
-- Run the characterization suite in CI and consider adding property-based tests for arithmetic invariants (e.g., addDays and subtractDays are inverses).
-- Use deprecation notices and a clear removal timeline in changelogs to inform the team.
+### Mover métodos al lugar correcto [G14, Feature Envy]
 
-## Small, reviewable commits
+- `monthCodeToQuarter` → método `quarter()` en el enum `Month`
+- `monthCodeToString` / `weekdayCodeToString` → métodos `toString()` y `toShortString()` en los enums correspondientes
+- `stringToMonthCode` → `Month.parse(String s)`
+- `stringToWeekdayCode` → `Day.parse(String s)`
 
-Break the refactor into small commits that reviewers can understand:
+### Mejoras adicionales
 
-- Add characterization tests (commit A).
-- Add new immutable type and unit tests for it (commit B).
-- Add adapter implementing old API delegating to new type (commit C).
-- Replace a few callers to use the new type (commit D, E).
-- Remove old implementation after full migration (final commit).
+- `isLeapYear` se reescribe de forma más expresiva con variables intermedias [G16]
+- `leapYearCount` se mueve a `SpreadsheetDate` donde realmente se usa [G6]
+- `addDays` deja de ser estático y pasa a ser un método de instancia [G18]
+- Se eliminan Javadocs redundantes y comentarios obsoletos [C2, C3]
+- Se eliminan `final` en argumentos y variables locales (añaden ruido sin valor) [G12]
 
-## Example pitfall and how to detect it
+## Reglas clave
 
-Pitfall: ignoring implicit timezone or locale sensitivity in formatting. Detect it by adding tests that assert consistent formatting under different default locales/time-zones (use explicit locale/time-zone in tests to avoid CI variability).
+| Código | Regla aplicada |
+|--------|---------------|
+| C1–C3 | Comentarios: eliminar historial, obsoletos, redundantes |
+| G5 | No duplicar: usar enums en lugar de validación manual |
+| G6 | Código al nivel de abstracción correcto |
+| G7 | Las clases base no deben conocer a sus derivadas |
+| G12 | Eliminar clutter (constructores vacíos, `final` innecesarios) |
+| G13 | Evitar acoplamiento artificial |
+| G14 | Evitar Feature Envy: mover métodos a donde pertenecen |
+| G16 | Variables intermedias para claridad |
+| G18 | Preferir métodos de instancia a estáticos |
+| J2–J3 | No heredar constantes; usar enums |
+| N1–N3 | Nombres descriptivos, nivel de abstracción correcto, nomenclatura estándar |
 
-## Quick checklist (consultancy)
+## Resumen
 
-- [ ] Do characterization tests exist for current `SerialDate` behavior?
-- [ ] Is there a clear, small immutable value object implementing core arithmetic and comparisons?
-- [ ] Is parsing/formatting separated from the value object?
-- [ ] Are adapters provided so callers can migrate incrementally?
-- [ ] Do CI tests include scenarios for leap years and month boundaries?
-- [ ] Are changes split into small commits for easy review?
-- [ ] Is there a deprecation and removal plan communicated to the team?
-
-## Recommended next steps
-
-- Start by adding a minimal characterization test suite that runs quickly in CI.
-- Implement the immutable `SerialLocalDate` and test thoroughly (use java.time equivalence tests).
-- Add the adapter and convert a low-risk module to the new API as a proof of concept.
-- Iterate until callers are comfortable and then retire the legacy class.
-
-If you want, I can create a concrete PR that adds the characterization tests and a starter implementation of `SerialLocalDate` (with Maven/Gradle configuration and a tiny sample test). Tell me if you prefer a Java package naming convention or a particular style (use of `java.time` only, or minimal dependency footprint) and I will prepare the PR.
+La refactorización de `SerialDate` es un ejemplo completo de cómo convertir una clase funcional pero mejorable en una clase limpia. La estrategia "primero hazlo funcionar, luego hazlo bien" permite aplicar cambios con confianza, respaldados en todo momento por los tests.

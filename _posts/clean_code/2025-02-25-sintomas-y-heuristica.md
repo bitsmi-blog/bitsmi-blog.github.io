@@ -9,109 +9,120 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
+El capítulo 17 es el catálogo definitivo de olores y heurísticas del libro. Recoge todas las razones concretas que guiaron las refactorizaciones de los capítulos anteriores, agrupadas en siete categorías: Comentarios, Entorno, Funciones, General, Java, Nombres y Tests.
+
 <!--more-->
 
-# Heuristics and systems
+## Comentarios
 
-This short consultancy-style note explains how to use heuristics to diagnose, prioritize, and fix problems in software systems. It highlights common symptoms that indicate deeper issues, offers practical heuristics you can apply immediately, and describes how to think in systems so your fixes don't create new problems.
+| Código | Nombre | Descripción |
+|--------|--------|-------------|
+| C1 | Información inapropiada | Metadatos como historial de cambios, autores o números de ticket no deben estar en comentarios; pertenecen al sistema de control de versiones. |
+| C2 | Comentario obsoleto | Comentarios que ya no corresponden al código son peores que no tener comentarios: desorientan. Deben actualizarse o eliminarse. |
+| C3 | Comentario redundante | Si el código ya es claro, el comentario que lo repite solo añade ruido: `i++; // increment i`. |
+| C4 | Comentario mal escrito | Un comentario que vale la pena escribir merece estar bien escrito: gramaticalmente correcto, breve y preciso. |
+| C5 | Código comentado | El código comentado se pudre. Nadie lo borra porque cree que otro lo necesita. Bórralo; el control de versiones lo recuerda. |
 
-Use this as a quick checklist during code reviews, incident postmortems, or when planning refactors.
+## Entorno
 
-## What is a heuristic (in engineering terms)?
+| Código | Nombre | Descripción |
+|--------|--------|-------------|
+| E1 | Build en más de un paso | Construir el proyecto debe ser un solo comando trivial. |
+| E2 | Tests en más de un paso | Ejecutar todos los tests debe ser un solo comando. |
 
-A heuristic is a simple, experience-based rule of thumb that helps you make decisions quickly when formal analysis is too costly or slow. In software, heuristics are used to spot likely problems, choose what to refactor first, and design safeguards. They are not guarantees; they guide attention to the most promising place to invest effort.
+## Funciones
 
-## Symptoms: what to look for first
+| Código | Nombre | Descripción |
+|--------|--------|-------------|
+| F1 | Demasiados argumentos | Cero es lo mejor; uno, dos o tres son aceptables; más de tres es muy cuestionable. |
+| F2 | Argumentos de salida | Los argumentos deben ser entradas, no salidas. Si hay que cambiar estado, que sea el del objeto receptor. |
+| F3 | Argumentos bandera | Un `boolean` como argumento declara que la función hace más de una cosa. |
+| F4 | Función muerta | Los métodos que nadie llama deben eliminarse; el control de versiones los recuerda. |
 
-These symptoms are practical signals that something in the code or system should be investigated further:
+## General
 
-- Recurrent bugs in the same module or feature.
-- Long or painful code reviews for the same set of files.
-- Tests that are hard to write or frequently adjusted when requirements change.
-- High coupling: many modules import or call the same low-level code.
-- Slow deployments or frequent hotfixes in a particular area.
-- Surprising side effects from small changes (brittle behavior).
-- Monitoring alerts that spike after a particular change or release.
+### G1–G10: Estructura y abstracción
 
-Each symptom can have multiple causes; treat them as invitations to ask focused questions rather than definitive diagnoses.
+- **G1 Varios lenguajes en un fichero**: Lo ideal es un solo lenguaje por fichero. Java + HTML + JavaScript en el mismo fichero dificulta la lectura.
+- **G2 Comportamiento obvio no implementado**: Siguiendo el Principio de Mínima Sorpresa, una función debe implementar lo que un programador razonablemente esperaría.
+- **G3 Comportamiento incorrecto en límites**: No confíes en la intuición: escribe tests para cada condición de contorno.
+- **G4 Saltarse salvaguardas**: Deshabilitar tests o ignorar warnings del compilador es jugar con fuego.
+- **G5 Duplicación**: Toda duplicación representa una abstracción perdida. La forma más sutil es el `switch/case` que aparece una y otra vez: reemplázalo con polimorfismo.
+- **G6 Código al nivel de abstracción incorrecto**: Las constantes, variables o funciones propias de una implementación concreta no deben estar en la clase base.
+- **G7 Clase base depende de sus derivadas**: En general, las clases base no deben conocer a sus subclases.
+- **G8 Demasiada información**: Las interfaces bien definidas son pequeñas. Pocos métodos, pocas variables de instancia, bajo acoplamiento.
+- **G9 Código muerto**: Código que no se ejecuta (ramas imposibles, `catch` vacíos, funciones no llamadas) debe eliminarse.
+- **G10 Separación vertical**: Las variables y funciones deben definirse cerca de donde se usan.
 
-## Practical heuristics (quick rules you can use now)
+### G11–G20: Convenciones y claridad
 
-1. The Small Surface Heuristic: prefer smaller, well-named public APIs. If a module exposes 20 public methods, consider whether responsibilities are mixed.
+- **G11 Inconsistencia**: Si usas `response` para `HttpServletResponse` en una función, úsalo en todas.
+- **G12 Clutter**: Constructores vacíos, variables sin usar, comentarios sin información: todo esto debe eliminarse.
+- **G13 Acoplamiento artificial**: No pongas enums o constantes de propósito general dentro de clases específicas.
+- **G14 Feature Envy**: Un método que usa intensivamente los datos de otro objeto debería estar en ese otro objeto.
+- **G15 Argumentos selector**: Un `false` al final de una llamada es un mal olor. Mejor dividir la función en dos.
+- **G16 Intención oscura**: Las expresiones densas, la notación húngara y los números mágicos ocultan la intención. Usa variables intermedias con nombres expresivos.
+- **G17 Responsabilidad mal ubicada**: El código debe estar donde el lector esperaría encontrarlo.
+- **G18 Estático inapropiado**: Prefiere métodos de instancia a estáticos cuando exista posibilidad de comportamiento polimórfico.
+- **G19 Variables explicativas**: Descomponer cálculos en variables intermedias con nombres significativos mejora la legibilidad de forma espectacular.
+- **G20 El nombre debe decir qué hace**: Si hay que leer la implementación para entender el nombre, el nombre está mal elegido.
 
-2. The Single-Reason Heuristic: a class or function should have one reason to change. If you can enumerate more than one cohesive reason, split it.
+### G21–G30: Algoritmos y diseño
 
-3. The Testability Heuristic: if it's hard to test a unit in isolation, its dependencies are too heavy or responsibilities are mixed. Aim to make the unit fast to instantiate and exercise.
+- **G21 Entiende el algoritmo**: No basta con que los tests pasen. Debes entender cómo funciona la solución.
+- **G22 Dependencias lógicas → físicas**: No hagas suposiciones sobre otro módulo; pregúntale explícitamente lo que necesitas.
+- **G23 Polimorfismo > if/else o switch/case**: Regla "ONE SWITCH": para un tipo de selección, como máximo un `switch`, que cree objetos polimórficos.
+- **G24 Seguir convenciones estándar**: El equipo elige un estándar y todos lo siguen sin excepciones.
+- **G25 Reemplazar números mágicos por constantes con nombre**: `SECONDS_PER_DAY` en lugar de `86400`.
+- **G26 Ser preciso**: Las decisiones de diseño deben tomarse con precisión: comprueba `null`, usa enteros para moneda, añade bloqueos si hay concurrencia.
+- **G27 Estructura > convención**: Una clase abstracta con métodos abstractos obliga a implementarlos; una convención de nombres no.
+- **G28 Encapsular condicionales**: `if (shouldBeDeleted(timer))` es más claro que `if (timer.hasExpired() && !timer.isRecurrent())`.
+- **G29 Evitar condicionales negativos**: `if (buffer.shouldCompact())` es más fácil de leer que `if (!buffer.shouldNotCompact())`.
+- **G30 Las funciones deben hacer una sola cosa**: Un bucle con condición y lógica de pago debe dividirse en tres métodos.
 
-4. The Dependency Direction Heuristic: dependencies should point inward to stable abstractions. If low-level modules depend on high-level business logic, invert boundaries.
+### G31–G36: Acoplamientos y configuración
 
-5. The State Leakage Heuristic: if you need to reset global state between tests or runs, consider making state explicit or introducing controlled scopes.
+- **G31 Acoplamientos temporales ocultos**: Si B debe llamarse antes que A, hazlo evidente en la firma: `findCommonPrefixAndSuffix()` llama a `findCommonPrefix()` internamente.
+- **G32 No ser arbitrario**: Si el código parece arbitrario, otros lo cambiarán. Haz que la estructura tenga razón de ser.
+- **G33 Condiciones de límite**: Encapsula los cálculos de límites; no los disperses por todo el código.
+- **G34 Las funciones deben descender un solo nivel de abstracción**: Mezclar lógica de alto y bajo nivel en la misma función dificulta la lectura.
+- **G35 Constantes de configuración en el nivel más alto**: Las constantes configurables deben vivir en el nivel superior de la jerarquía y pasarse hacia abajo.
+- **G36 Evitar navegación transitiva**: `a.getB().getC().doSomething()` crea arquitecturas rígidas. Ley de Demeter: un módulo solo debe conocer a sus colaboradores inmediatos.
 
-6. The Observability Heuristic: if you cannot tell what changed from logs/metrics, add lightweight telemetry (entry/exit logs, key counters, error tags).
+## Java
 
-7. The Minimal Magic Heuristic: favor explicit code over clever, implicit behavior. Magic saves a tiny amount of typing but costs cognitive load for future readers.
+| Código | Nombre | Descripción |
+|--------|--------|-------------|
+| J1 | Evitar listas largas de imports | Usar `import paquete.*` en lugar de importar clase a clase cuando se usan dos o más clases del mismo paquete. |
+| J2 | No heredar constantes | Heredar de una interfaz para obtener constantes es un truco sucio. Usa `static import`. |
+| J3 | Constantes vs enums | Ahora que Java tiene enums (Java 5), úsalos: son más expresivos que `public static final int`. |
 
-8. The First Fix Heuristic: when a symptom appears, fix the simplest local problem first (tests, trivial validation) to stabilize the system; then work outward with deeper changes.
+## Nombres
 
-## Using heuristics during a code review or incident
+| Código | Nombre | Descripción |
+|--------|--------|-------------|
+| N1 | Nombres descriptivos | Los nombres son el 90% de lo que hace el código legible. Tómate el tiempo necesario. |
+| N2 | Nivel de abstracción correcto | No uses `phoneNumber` en una interfaz `Modem`; usa `connectionLocator`. |
+| N3 | Nomenclatura estándar | Si usas el patrón DECORATOR, usa "Decorator" en el nombre. |
+| N4 | Nombres inequívocos | `doRename` que contiene `renamePage` no dice nada sobre la diferencia entre ambas. |
+| N5 | Nombres largos para ámbitos largos | `i` es perfecto en un bucle de 5 líneas; para ámbitos amplios usa nombres completos. |
+| N6 | Evitar encodings | Los prefijos `m_`, `f`, `I_` son ruido en entornos modernos. |
+| N7 | Los nombres deben describir los efectos secundarios | `getOos()` que crea el objeto si no existe debería llamarse `createOrReturnOos`. |
 
-- Start by listing the observable symptom(s) and the impact (how often, how severe).
-- Apply 2–3 heuristics that fit the symptom (e.g., Testability and State Leakage for flaky tests).
-- Propose targeted actions: add tests, extract a small interface, isolate side effects, add metrics.
-- Time-box the initial fix and verify behavior before attempting larger refactors.
+## Tests
 
-This process keeps early fixes low-risk while creating data to support bigger investments later.
+| Código | Nombre | Descripción |
+|--------|--------|-------------|
+| T1 | Tests insuficientes | Una suite debe testear todo lo que podría fallar. |
+| T2 | Usa una herramienta de cobertura | Las herramientas de cobertura revelan qué ramas no se han testeado. |
+| T3 | No omitas tests triviales | Son fáciles de escribir y su valor documental supera el coste. |
+| T4 | Un test ignorado es una pregunta | `@Ignore` o un test comentado expresan ambigüedad en los requisitos. |
+| T5 | Testea las condiciones de límite | Los límites son donde más fallan los algoritmos. |
+| T6 | Testea exhaustivamente cerca de los bugs | Los bugs se agrupan. Si encuentras uno, busca más en la misma función. |
+| T7 | Los patrones de fallo son reveladores | Ordenar los tests y observar los patrones de rojo/verde puede apuntar a la causa raíz. |
+| T8 | Los patrones de cobertura son reveladores | El código no cubierto por los tests que pasan da pistas sobre los que fallan. |
+| T9 | Los tests deben ser rápidos | Un test lento es un test que no se ejecutará cuando haya presión de tiempo. |
 
-## Thinking in systems — avoid local optimizations that break the whole
+## Resumen
 
-Systems thinking reminds us that a system's behavior emerges from the interactions of its parts. A few practical rules:
-
-- Favor observable invariants: add metrics that express business expectations (requests per minute, percent successful, average latency) rather than only low-level traces.
-- Consider feedback loops: caching, retries, and autoscaling interact in ways that can amplify faults. Model or simulate these interactions when possible.
-- Avoid one-off special cases that bypass normal flows — they create fragile paths and testing blind spots.
-- Small, repeated changes with measurement beat large rewrites with guesses. Use canary deployments and A/B tests for risky behavioral changes.
-
-## Short examples (how to apply heuristics)
-
-1) Flaky tests in a module
-- Symptom: tests occasionally fail when run in CI but pass locally.
-- Heuristics: Testability, State Leakage, Observability.
-- Immediate actions: run tests in isolation, audit for shared static state, add setup/teardown in tests to reset environment, add a reproducible failing case.
-- Longer-term: extract pure logic into small, immutable components and mock external systems in unit tests.
-
-2) High bug frequency in a legacy parser
-- Symptom: many bug fixes around parsing edge cases.
-- Heuristics: Minimal Magic, Small Surface, First Fix.
-- Immediate actions: add characterization tests covering observed failures; add clear input validation and explicit error messages.
-- Longer-term: extract a small parser module with a well-defined API, and consider replacing ad-hoc parsing with a tested parsing library.
-
-3) Slow degradation after deploy
-- Symptom: latency increases only after particular deployments.
-- Heuristics: Observability, Dependency Direction, Systems thinking.
-- Immediate actions: add request-level tracing and latency histograms, roll back suspect change, run canary to reproduce.
-- Longer-term: decouple synchronous dependencies, add timeouts and circuit breakers, and design graceful degradation paths.
-
-## Quick checklist for a heuristic-driven review
-
-- [ ] Did we capture the symptom and measure its impact?
-- [ ] Which heuristics suggest likely causes?
-- [ ] Can we stabilize the system with a small, reversible change first?
-- [ ] Are there easy tests or metrics we can add to increase confidence?
-- [ ] Is the proposed change localized or will it affect many components (risk)?
-- [ ] Do we understand feedback loops and operational consequences?
-- [ ] Is there a rollback or mitigation plan if the change increases risk?
-
-## Communication and team practices
-
-- Use heuristics during postmortems to focus learning (what worked, what didn't), not to assign blame.
-- Share short remediation plans that include a quick stabilizing action and a longer-term improvement story.
-- Keep the language concrete: "increase error logging for X" instead of "improve observability".
-- Track recurring symptoms across sprints — recurring issues are signals for systemic investment.
-
-## Recommended next steps (consultancy)
-
-- Run a 1-hour triage session: list top 3 symptoms, pick one, apply heuristics, and implement a small stabilizing change.
-- Add two or three high-value metrics and a simple dashboard to track the chosen symptom over time.
-- Identify one module with recurrent problems and propose a small refactor plan using the Single-Reason and Small Surface heuristics.
-
-If you'd like, I can help run the triage on your codebase, produce the quick fixes (tests, metrics, small refactors), and prepare a short PR with the proposed changes — point me at the repository or the files you want me to analyze.
+El catálogo del capítulo 17 no pretende ser exhaustivo: es un sistema de valores. El código limpio no se escribe siguiendo una lista de reglas, sino cultivando el juicio profesional que permite reconocer los olores y saber cómo eliminarlos.

@@ -9,177 +9,143 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
+El Apéndice A, escrito por Brett L. Schuchert, amplía el capítulo 13 sobre concurrencia con análisis más profundos: ejemplo cliente/servidor, posibles caminos de ejecución, interbloqueo y estrategias de incremento de throughput.
+
 <!--more-->
 
-# Appendix A — Concurrency II
+## Ejemplo Cliente/Servidor
 
-This short consultancy-style appendix covers practical, advanced concerns when working with concurrent and parallel code. It assumes you already know the basics (threads, locks, volatile, synchronized) and focuses on patterns, testing strategies, performance heuristics, and migration steps you can apply quickly.
+### Versión de un solo hilo
 
-Use this note as a short reference during design discussions, code reviews, and incident triage when concurrency is involved.
+Un servidor espera en un socket, procesa cada petición y vuelve a esperar. Un test de rendimiento exige que procese un conjunto de peticiones en menos de 10 segundos:
 
-## Goals and constraints
-
-- Make concurrency predictable and testable.
-- Minimize shared mutable state and reduce contention.
-- Choose high-level constructs (executors, futures, streams, reactive) over raw threads where appropriate.
-- Document and measure behavior; prefer small iterative changes.
-
-## Common high-level patterns
-
-1. Task-based parallelism (ExecutorService / thread pools)
-   - Use a bounded thread pool for CPU-bound tasks (size around number of cores).
-   - Use larger pools for I/O-bound tasks, but prefer asynchronous I/O if possible.
-   - Never create unbounded thread pools in production without controls.
-
-2. Futures and composition (CompletableFuture / Future)
-   - Prefer composing independent computations with futures instead of blocking waits.
-   - Use timeouts and exception handlers; avoid silent swallowing of exceptions.
-
-3. Work-stealing and fork-join (ForkJoinPool)
-   - Use for divide-and-conquer parallelism (e.g., parallel streams). Ensure tasks are small and balanced.
-
-4. Messaging and Actors
-   - Use actor-style isolation (Akka, Vert.x, or simple single-threaded queues) to avoid shared mutable state. Good for bounded concurrency and domain isolation.
-
-5. Lock-free and concurrent collections
-   - Use java.util.concurrent collections (ConcurrentHashMap, ConcurrentLinkedQueue) when possible.
-   - Only attempt custom lock-free algorithms with strong justification and deep review—they are easy to get wrong.
-
-6. Immutable state and functional transformations
-   - Prefer immutable data structures for safe sharing; copy-on-write or persistent collections help when mutations are rare.
-
-## Practical examples (Java)
-
-Here are short idiomatic examples you can copy into Scala/Java projects.
-
-1) ExecutorService (bounded pool) pattern
-
-```text
-ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-try {
-    List<Callable<Result>> tasks = ...;
-    List<Future<Result>> results = pool.invokeAll(tasks);
-    // process results
-} finally {
-    pool.shutdown();
+```java
+@Test(timeout = 10000)
+public void shouldRunInUnder10Seconds() throws Exception {
+    Thread[] threads = createThreads();
+    startAllThreads(threads);
+    waitForAllThreadsToFinish(threads);
 }
 ```
 
-Notes: use invokeAll with timeouts when tasks may hang; prefer submit+timeout handling for finer control.
+Si el test falla, la pregunta es: ¿dónde se gasta el tiempo?
 
-2) CompletableFuture composition (non-blocking)
+- **Operaciones de I/O** (sockets, bases de datos, memoria virtual): la CPU espera.
+- **Operaciones de CPU** (cálculos, regex, GC): la CPU trabaja.
 
-```text
-CompletableFuture.supplyAsync(() -> fetchUser(userId), pool)
-    .thenCompose(user -> CompletableFuture.supplyAsync(() -> fetchOrders(user), pool))
-    .thenApply(orders -> aggregate(orders))
-    .exceptionally(ex -> handle(ex));
-```
+Si el sistema es I/O-bound, el multithreading puede mejorar el rendimiento al solapar esperas con procesamiento.
 
-Tips: always handle exceptions and consider using `orTimeout` to avoid indefinite waits.
+### Añadiendo hilos
 
-3) Actor-like queue (single-threaded worker)
+Una solución naive es crear un hilo por cada petición:
 
-```text
-BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
-Thread worker = new Thread(() -> {
-    while (!Thread.currentThread().isInterrupted()) {
-        try {
-            Runnable job = queue.take();
-            job.run();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+```java
+void process(final Socket socket) {
+    Runnable clientHandler = new Runnable() {
+        public void run() {
+            String message = MessageUtils.getMessage(socket);
+            MessageUtils.sendMessage(socket, "Processed: " + message);
+            closeIgnoringException(socket);
         }
-    }
-});
-worker.start();
-// offer tasks: queue.offer(() -> doWork(...));
-```
-
-Use bounded queues and backpressure to prevent unbounded memory growth.
-
-## Testing and debugging concurrent code
-
-- Characterization tests: write deterministic tests that capture current behavior before changes.
-- Unit-level concurrency tests: prefer testing small units with simulated concurrency using tools such as JUnit + concurrency testing helpers (CountDownLatch, CyclicBarrier, Semaphore) to coordinate threads.
-- Use deterministic concurrency frameworks for tests (e.g., thread schedulers in concurrency testing libraries) when possible.
-- Reproduce flaky behavior locally by running tests in loop, under stress, and with varied thread scheduling (CI runners can help).
-- Add logs with thread names and correlation ids — helpful for reproducing race windows.
-- Use async assertions and timeouts in tests to avoid indefinite blocking.
-
-Example: testing a concurrent increment
-
-```text
-@Test
-void concurrentIncrement() throws InterruptedException {
-    AtomicInteger counter = new AtomicInteger();
-    int threads = 10;
-    ExecutorService pool = Executors.newFixedThreadPool(threads);
-    CountDownLatch start = new CountDownLatch(1);
-    CountDownLatch done = new CountDownLatch(threads);
-
-    for (int i = 0; i < threads; i++) {
-        pool.submit(() -> {
-            try {
-                start.await();
-                for (int j = 0; j < 1000; j++) counter.incrementAndGet();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } finally {
-                done.countDown();
-            }
-        });
-    }
-    start.countDown();
-    assertTrue(done.await(5, TimeUnit.SECONDS));
-    assertEquals(threads * 1000, counter.get());
-    pool.shutdownNow();
+    };
+    new Thread(clientHandler).start();
 }
 ```
 
-## Performance and contention heuristics
+Esto pasa el test, pero viola el Principio de Responsabilidad Única. La función `process` gestiona simultáneamente: conexión de sockets, procesamiento de clientes, política de threading y política de cierre.
 
-- Measure first: use flame graphs, contention sampling (Java Flight Recorder, async-profiler), and latency histograms.
-- Hotspots: synchronized methods, locks with long hold times, cache misses due to false sharing.
-- Use fine-grained locks or lock striping to reduce contention; prefer read-write locks only when readers vastly outnumber writers.
-- Beware of false sharing: align frequently-updated fields or use padding to avoid CPU cache line contention.
-- Prefer batching updates and reducing synchronization frequency (e.g., accumulate locally then flush).
+### Diseño limpio con SRP
 
-## Common pitfalls and how to detect/fix them
+Se introduce una interfaz `ClientScheduler` que aísla toda la lógica de threading:
 
-1. Excessive thread creation
-   - Symptom: threads pile up, GC pressure, OOM. Fix: use bounded pools and backpressure.
+```java
+public interface ClientScheduler {
+    void schedule(ClientRequestProcessor requestProcessor);
+}
+```
 
-2. Deadlocks
-   - Symptom: system stalls with threads waiting on locks. Fix: detect with thread dumps, enforce lock ordering, or use tryLock with timeouts and recovery.
+Implementaciones intercambiables: `ThreadPerRequestScheduler` y `ExecutorClientScheduler` (usando `java.util.concurrent.Executors.newFixedThreadPool`). El código de negocio no sabe nada sobre los hilos.
 
-3. Live locks and starvation
-   - Symptom: progress slows; some tasks never complete. Fix: fairness mechanisms, bounded retries, or redesign to avoid priority inversion.
+## Posibles caminos de ejecución
 
-4. Silent exception swallowing
-   - Symptom: background tasks stop processing without clear error. Fix: centralize exception handling, log and surface failures, fail-fast where appropriate.
+Una línea Java aparentemente inocua puede expandirse en varios bytecodes JVM:
 
-## Migration strategy: small, measurable steps
+```java
+return ++lastIdUsed;
+```
 
-- Start with adding timeouts, metrics, and better logging around suspect concurrency code.
-- Replace raw threads with executor-based abstractions in a single module and measure behavior.
-- Introduce immutable messages and actor boundaries where shared state causes bugs.
-- Run canaries and increase load gradually; monitor error rates and latencies.
+Esta operación comprende: leer `lastIdUsed`, incrementar, escribir y retornar. Con dos hilos que empiezan con `lastIdUsed = 93`, los posibles resultados son:
 
-## Quick checklist (consultancy)
+- T1 obtiene 94, T2 obtiene 95, `lastIdUsed` = 95 ✓
+- T1 obtiene 95, T2 obtiene 94, `lastIdUsed` = 95 ✓
+- T1 obtiene 94, T2 obtiene 94, `lastIdUsed` = 94 ✗ (condición de carrera)
 
-- [ ] Do we measure concurrency-related metrics (latency, queue depth, thread counts)?
-- [ ] Are thread pools bounded and sized appropriately for the workload?
-- [ ] Are timeouts and exception handlers present for background tasks?
-- [ ] Is shared mutable state minimized or protected by appropriate concurrency primitives?
-- [ ] Are concurrent collections used where appropriate instead of manual synchronization?
-- [ ] Are tests in place to assert correctness under concurrent access and to reproduce known race conditions?
-- [ ] Are logs and thread dumps configured for production troubleshooting?
+El número de posibles caminos de ejecución para N bytecodes y T hilos crece exponencialmente. Para evitar resultados incorrectos, las secciones críticas deben protegerse con `synchronized` o usando clases del paquete `java.util.concurrent.atomic`.
 
-## Recommended next steps
+## Interbloqueo (Deadlock)
 
-- Add a short benchmark and contention profile for the suspect module.
-- Replace any ad-hoc thread creation with a controlled ExecutorService and add metrics for queue depth and execution latency.
-- Add small deterministic concurrency tests (use CountDownLatch/CyclicBarrier) to capture and prevent regressions.
+### Las cuatro condiciones
 
-If you want, I can create a small PR that replaces raw thread usage in one module with a safe ExecutorService wrapper, add metrics and a simple concurrent unit test. Point me to the file(s) you want me to change and I'll prepare the changes and run a validation locally.
+El interbloqueo requiere que se cumplan simultáneamente cuatro condiciones:
+
+1. **Exclusión mutua**: el recurso no puede usarse por varios hilos a la vez.
+2. **Lock & Wait**: un hilo retiene un recurso mientras espera obtener otro.
+3. **No expropiación**: un hilo no puede quitarle un recurso a otro.
+4. **Espera circular**: T1 espera un recurso que tiene T2, y T2 espera uno que tiene T1.
+
+### Ejemplo concreto
+
+Un servidor web con dos pools (conexiones DB y conexiones MQ):
+
+- Los hilos de "crear" adquieren DB primero, luego MQ.
+- Los hilos de "actualizar" adquieren MQ primero, luego DB.
+
+Si todos los recursos de un tipo se agotan en el momento equivocado, el sistema se bloquea indefinidamente.
+
+### Romper el interbloqueo
+
+Basta con romper *una* de las cuatro condiciones:
+
+| Condición | Estrategia |
+|-----------|-----------|
+| Exclusión mutua | Usar recursos concurrentes (`AtomicInteger`); aumentar el número de recursos |
+| Lock & Wait | Verificar disponibilidad antes de adquirir; si alguno está ocupado, liberar todos y reintentar |
+| No expropiación | Raramente aplicable directamente |
+| Espera circular | Acordar un orden global para la adquisición de recursos y respetarlo siempre |
+
+La estrategia más robusta es ordenar los recursos: si todos los hilos adquieren siempre los recursos en el mismo orden (primero DB, luego MQ), la espera circular es imposible.
+
+## Locking en cliente vs servidor
+
+El locking en el cliente (cada consumidor sincroniza antes de usar el objeto) tiene múltiples problemas: duplicación, propensión a errores y acoplamiento. El locking en el servidor (el propio objeto sincroniza sus métodos) es preferible:
+
+- Reduce código repetido.
+- Permite intercambiar una implementación thread-safe por una no thread-safe en despliegues de un solo hilo.
+- Centraliza la política: si hay un error de concurrencia, hay un solo lugar donde buscar.
+
+Si no se puede modificar el servidor, se usa un ADAPTER que añade sincronización alrededor de la API existente.
+
+## Incremento de throughput
+
+Para un sistema que descarga páginas y las procesa:
+
+- Tiempo de I/O por página: 1 s (0% CPU)
+- Tiempo de procesamiento: 0,5 s (100% CPU)
+
+Con un solo hilo: 1,5 s × N páginas.
+
+Con tres hilos: las descargas se solapan con el procesamiento. Throughput ≈ 3×. La clave es mantener el bloque `synchronized` tan pequeño como sea posible (solo la sección crítica de obtención de la siguiente URL).
+
+## Reglas clave
+
+| Principio | Descripción |
+|-----------|-------------|
+| SRP en concurrencia | El código que gestiona hilos no debe hacer nada más |
+| Secciones críticas pequeñas | Sincronizar lo mínimo indispensable |
+| Clases thread-safe del JDK | Preferir `java.util.concurrent` a gestión manual |
+| Orden de adquisición de recursos | La estrategia más eficaz contra el interbloqueo |
+| Testing de concurrencia | Variar configuraciones, número de hilos y cargas para exponer condiciones de carrera |
+
+## Resumen
+
+La concurrencia exige disciplina adicional: el SRP aplicado a los hilos, la conciencia de los posibles caminos de ejecución y el conocimiento de las cuatro condiciones del interbloqueo son las herramientas fundamentales para escribir sistemas concurrentes correctos y mantenibles.
