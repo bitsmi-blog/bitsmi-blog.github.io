@@ -9,178 +9,107 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
-📄 Résumé: Clean Code – Chapter 9: Unit Tests
-🧠 Core Concepts
-Principle
-Summary
-Tests are first-class citizens
-Test code should be written with the same care and quality as production code.
-TDD Cycle (Three Laws)
-1. No production code before a failing test.2. No more test than needed to fail.3. No more code than needed to pass.
-   Cleanliness matters
-   Dirty tests become a liability, impede change, and ultimately get discarded—causing code rot.
-   Tests enable design
-   Clean tests give confidence to refactor, enabling maintainability and all the “-ilities”.
-   Domain-Specific Testing Language
-   Refactor test utility methods into expressive, readable abstractions.
-   F.I.R.S.T.
-   Tests should be Fast, Independent, Repeatable, Self-validating, and Timely.
+## Overview
 
+Chapter 9 argues that unit tests are not a second-class citizen of the codebase. Tests must be written with the same care, design, and discipline as production code. Dirty tests are as damaging as no tests: they accumulate technical debt, resist change, and ultimately get discarded -- taking with them all the safety they once provided.
 
-🧪 Clean Test Characteristics
-1. Readable Tests
-   Bad:
-   crawler.addPage(root, PathParser.parse("PageOne"));
-   assertSubString("<name>PageOne</name>", response.getContent());
+<!--more-->
 
-Refactored:
-makePages("PageOne", "PageTwo");
-submitRequest("root", "type:pages");
-assertResponseContains("<name>PageOne</name>");
+## The Three Laws of TDD
 
-✅ Use helper methods (e.g., makePages(), submitRequest()) to hide irrelevant setup and clarify intent.
+Test-Driven Development is governed by three laws that lock developer and test into a tight cycle of roughly thirty seconds:
 
-2. Build-Operate-Check (BOC) Pattern
-   Structure each test in three distinct phases:
-   // BUILD
-   makePageWithContent("PageOne", "sample content");
+1. You may not write production code until you have written a failing unit test.
+2. You may not write more of a unit test than is sufficient to fail (not compiling counts as failing).
+3. You may not write more production code than is sufficient to pass the currently failing test.
 
-// OPERATE
-submitRequest("PageOne", "type:data");
+Working this way generates a comprehensive test suite that covers virtually all production code.
 
-// CHECK
-assertResponseContains("sample content");
+## Keeping Tests Clean
 
+Some teams decide that test code does not need to meet the same quality standards as production code. This is a false economy. As production code evolves, tests must change with it. Dirty tests are hard to change; the harder they are to change, the less they are run; the less they are run, the faster the production code rots. The moral: **test code is just as important as production code**.
 
-⚙️ Example: Refactored Test Suite
-Refactored Test (from FitNesse):
-@Test
-public void testGetPageHierarchyAsXml() {
-makePages("PageOne", "PageOne.ChildOne", "PageTwo");
-submitRequest("root", "type:pages");
-assertResponseIsXML();
-assertResponseContains(
-"<name>PageOne</name>",
-"<name>PageTwo</name>",
-"<name>ChildOne</name>"
-);
+## Tests Enable the -ilities
+
+It is unit tests that keep code flexible, maintainable, and reusable. With a comprehensive test suite you can refactor or restructure the system without fear. Without tests, every change is a possible bug. Tests are what make continuous improvement possible.
+
+## Clean Tests
+
+What makes a test clean? Readability. Clarity, simplicity, and density of expression. Tests should say a lot with as few expressions as possible.
+
+Compare a verbose test that is loaded with irrelevant setup detail:
+
+```java
+public void testGetPageHierarchyAsXml() throws Exception {
+    crawler.addPage(root, PathParser.parse("PageOne"));
+    crawler.addPage(root, PathParser.parse("PageOne.ChildOne"));
+    crawler.addPage(root, PathParser.parse("PageTwo"));
+    request.setResource("root");
+    request.addInput("type", "pages");
+    Responder responder = new SerializedPageResponder();
+    SimpleResponse response = (SimpleResponse) responder.makeResponse(
+        new FitNesseContext(root), request);
+    String xml = response.getContent();
+    assertEquals("text/xml", response.getContentType());
+    assertSubString("<name>PageOne</name>", xml);
+    assertSubString("<name>PageTwo</name>", xml);
+    assertSubString("<name>ChildOne</name>", xml);
 }
+```
 
+With a version refactored into helper methods:
 
-🎯 Single Concept Per Test
-Poor Practice:
-public void testAddMonths() {
-assertEquals(...); // Tests multiple concepts: 1, 2, 3 months later
+```java
+public void testGetPageHierarchyAsXml() throws Exception {
+    makePages("PageOne", "PageOne.ChildOne", "PageTwo");
+    submitRequest("root", "type:pages");
+    assertResponseIsXML();
+    assertResponseContains(
+        "<name>PageOne</name>", "<name>PageTwo</name>", "<name>ChildOne</name>"
+    );
 }
+```
 
-Clean Practice:
-@Test
-public void testAddOneMonthToEndOfMay() {
-assertEquals("2004-06-30", SerialDate.addMonths(1, d1).toString());
-}
+The second version makes intent immediately clear. The helper methods form a **domain-specific testing language** that hides irrelevant implementation details.
 
-🔁 Break long tests into smaller, concept-focused ones.
+### Build-Operate-Check Pattern
 
-🧬 Domain-Specific Testing Language
-Transform verbose, imperative logic into a test DSL:
-@Test
-public void turnOnLoTempAlarmAtThreshold() {
-wayTooCold();
-assertEquals("HBchL", hw.getState());
-}
+Structure each test in three distinct phases: **Build** the test data, **Operate** on it, then **Check** the results. This pattern keeps tests focused and readable.
 
-Interpretation:
-H: heater ON
+### A Dual Standard
 
+Test code lives in a test environment, not a production environment. It is acceptable to sacrifice some performance efficiency (e.g., using string concatenation instead of `StringBuffer`) when it improves readability. What is never acceptable is sacrificing *cleanliness*.
 
-B: blower ON
+## One Assert per Test
 
+One school of thought requires exactly one `assert` per test function. A looser but more practical guideline: **minimise the number of asserts** and, where possible, rely on a domain-specific testing API that compresses multiple checks into a single expressive assertion.
 
-c: cooler OFF
+## Single Concept per Test
 
+The more important rule is that each test function covers **a single concept**. Do not write long test functions that mix multiple unrelated scenarios in sequence. When a test fails, you should know immediately which concept has broken.
 
-h: hi-temp alarm OFF
+## F.I.R.S.T. Principles
 
+| Letter | Principle | Description |
+|--------|-----------|-------------|
+| F | Fast | Tests must run quickly so they are run often. Slow tests go unrun. |
+| I | Independent | Tests must not depend on each other. Any test should be runnable in isolation and in any order. |
+| R | Repeatable | Tests must pass in every environment: production, QA, developer laptop with no network. |
+| S | Self-validating | Tests must have a clear boolean outcome -- pass or fail -- requiring no manual inspection. |
+| T | Timely | Tests should be written just before the production code that makes them pass. |
 
-L: lo-temp alarm ON
+---
 
+## Key Rules / Quick Reference
 
-🔥 Advantage: Test reads like a specification.
+- Test code has the same quality requirements as production code.
+- Follow the Three Laws of TDD: failing test first, minimum test to fail, minimum code to pass.
+- Clean tests are readable -- use helper methods to hide irrelevant setup.
+- Build-Operate-Check: structure every test in three clear phases.
+- One concept per test; minimise the number of asserts.
+- Dirty tests lead to loss of the test suite, which leads to production code rot.
+- F.I.R.S.T.: Fast, Independent, Repeatable, Self-validating, Timely.
 
-🔁 One Assert per Test – Myth or Rule?
-Guideline: Prefer one assert per test to enhance clarity.
+## Summary
 
-
-Trade-off: Multiple asserts are OK if they test a single concept and are easily interpreted.
-
-
-✅ Consider splitting with @Before or Template Method pattern if duplication becomes significant.
-
-
-
-🔠 F.I.R.S.T. Principles
-Letter
-Principle
-Meaning
-F
-Fast
-Tests should run quickly to support frequent execution.
-I
-Independent
-Tests must not rely on other tests’ results or state.
-R
-Repeatable
-Tests should work in any environment without dependencies.
-S
-Self-validating
-Clear pass/fail, no need for manual inspection.
-T
-Timely
-Tests should be written just before the production code they validate.
-
-
-📌 Key Takeaways
-Clean unit tests are indispensable for high-quality, maintainable code.
-
-
-Maintain readability, focus, and expressiveness in tests just as in production code.
-
-
-Use abstraction to remove irrelevant setup and emphasize test intent.
-
-
-Clean tests give developers freedom to refactor without fear.
-
-
-
-🛠️ Visualization: BOC Pattern vs. Messy Test
-Messy Test (Before Refactoring)
-request.setResource("root");
-request.addInput("type", "pages");
-Responder responder = new SerializedPageResponder();
-SimpleResponse response = responder.makeResponse(new FitNesseContext(root), request);
-assertEquals("text/xml", response.getContentType());
-
-Clean Test Structure
-BUILD     → makePages("PageOne", "PageTwo")
-OPERATE   → submitRequest("root", "type:pages")
-CHECK     → assertResponseIsXML(), assertResponseContains(...)
-
-
-✅ Code Snippet Summary
-Helper for Test State (Readable State Checking)
-public String getState() {
-return (heater ? "H" : "h") +
-(blower ? "B" : "b") +
-(cooler ? "C" : "c") +
-(hiTempAlarm ? "H" : "h") +
-(loTempAlarm ? "L" : "l");
-}
-
-
-📚 Conclusion
-Unit tests aren’t optional or secondary—they are equal partners in building clean, reliable, and evolvable software. Treat them with the same care. Refactor relentlessly. Let tests express your intent clearly and confidently.
-“If you let the tests rot, then your code will rot too.” – Robert C. Martin
-
-Let me know if you'd like this as a PDF/Markdown, or integrated into a code repository with working examples.
-
+Unit tests are equal partners in the health of a project. They preserve and enhance the flexibility, maintainability, and reusability of the production code. Keep them as clean as the production code, refactor them relentlessly, and let them express your intent clearly. If you let the tests rot, the code will rot too.
