@@ -41,9 +41,33 @@ Duplication is the primary enemy of a well-designed system
 
 
 
-The TEMPLATE METHOD2 pattern is a common technique for removing higher-level duplication
+The TEMPLATE METHOD pattern is a common technique for removing higher-level duplication.
 
-Add EXTRA info about template method. xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Consider a system with two classes — `VacationPolicy` for US employees and `VacationPolicy` for EU employees — both implementing an `accrueVacation()` method that shares identical steps but differs in one detail: legal minimums vary by jurisdiction. The duplicated structure can be eliminated by defining the common algorithm in a base class and delegating only the variable step to subclasses:
+
+```java
+abstract public class VacationPolicy {
+    public void accrueVacation() {
+        calculateBaseVacationHours();
+        alterForLegalMinimums();   // subclass provides jurisdiction-specific logic
+        applyToPayroll();
+    }
+
+    private void calculateBaseVacationHours() { ... }
+    abstract protected void alterForLegalMinimums();
+    private void applyToPayroll() { ... }
+}
+
+public class USVacationPolicy extends VacationPolicy {
+    @Override protected void alterForLegalMinimums() { /* US rules */ }
+}
+
+public class EUVacationPolicy extends VacationPolicy {
+    @Override protected void alterForLegalMinimums() { /* EU rules */ }
+}
+```
+
+The skeleton of the algorithm lives in `VacationPolicy`; the subclasses fill in only the parts that differ. No duplication of the common steps remains.
 
 
 
