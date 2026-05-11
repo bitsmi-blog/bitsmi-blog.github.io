@@ -28,7 +28,7 @@ int elapsedTimeInDays
 int daysSinceCreation
 ```
 
-The **implicity** of the code — the degree to which context is not explicit in the code itself — must be minimised.
+The **implicitness** of the code — the degree to which context is not explicit in the code itself — must be minimised.
 
 ## Avoid Disinformation
 

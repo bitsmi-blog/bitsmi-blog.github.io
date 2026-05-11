@@ -9,36 +9,36 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
-El Apéndice B contiene el listado completo del código fuente de `org.jfree.date.SerialDate`, extraído de la librería de código abierto JCommon. Su presencia en el libro tiene un propósito didáctico muy concreto.
+Appendix B contains the complete source-code listing of `org.jfree.date.SerialDate`, taken from the open-source JCommon library. Its presence in the book serves a very specific educational purpose.
 
 <!--more-->
 
-## Qué contiene el apéndice
+## What the Appendix Contains
 
-El apéndice reproduce íntegramente el fichero `SerialDate.java` y los ficheros relacionados de JCommon tal como existían antes de que el autor los refactorizase en el capítulo 16. Se incluyen:
+The appendix reproduces in full the `SerialDate.java` file and the related JCommon files as they existed before the author refactored them in Chapter 16. Included are:
 
-- `SerialDate.java`: la clase abstracta base (~900 líneas)
-- `MonthConstants.java`: interfaz con las constantes de los meses
-- `SpreadsheetDate.java`: implementación concreta de `SerialDate`
-- `RelativeDayOfWeekRule.java`: regla auxiliar que usa `SerialDate`
-- El listado refactorizado final (`DayDate.java` y clases asociadas)
+- `SerialDate.java`: the abstract base class (~900 lines)
+- `MonthConstants.java`: interface containing the month constants
+- `SpreadsheetDate.java`: concrete implementation of `SerialDate`
+- `RelativeDayOfWeekRule.java`: auxiliary rule that uses `SerialDate`
+- The final refactored listing (`DayDate.java` and associated classes)
 
-## Por qué está en el libro
+## Why It Is in the Book
 
-El capítulo 16 analiza `SerialDate` línea a línea y propone decenas de cambios. Para que el lector pueda seguir ese análisis con el código delante —y ver exactamente a qué líneas se refiere el autor cuando cita "línea 98", "línea 326" o "línea 638"— el apéndice proporciona la fuente original numerada.
+Chapter 16 analyses `SerialDate` line by line and proposes dozens of changes. So that readers can follow that analysis with the code in front of them — and see exactly which lines the author refers to when citing "line 98", "line 326", or "line 638" — the appendix provides the original, numbered source.
 
-Sin el apéndice, las referencias del capítulo 16 a números de línea concretos resultarían opacas. Con él, el lector puede verificar cada decisión de refactorización en su contexto original.
+Without the appendix, the Chapter 16 references to specific line numbers would be opaque. With it, readers can verify every refactoring decision in its original context.
 
-## Relación con el capítulo 16
+## Relationship to Chapter 16
 
-El flujo de lectura recomendado es:
+The recommended reading flow is:
 
-1. Leer el capítulo 16 con el apéndice abierto como referencia.
-2. Seguir cada cambio propuesto (renombrar clase, convertir constantes en enums, mover métodos, eliminar código muerto) sobre el listado original.
-3. Comparar el resultado con el listado refactorizado final que también incluye el apéndice.
+1. Read Chapter 16 with the appendix open as a reference.
+2. Follow each proposed change (renaming the class, converting constants to enums, moving methods, removing dead code) against the original listing.
+3. Compare the result with the final refactored listing, also included in the appendix.
 
-Este ejercicio ilustra cómo un código perfectamente funcional puede mejorarse sustancialmente en claridad, cohesión y adherencia a los principios del Código Limpio sin cambiar su comportamiento externo.
+This exercise illustrates how perfectly functional code can be substantially improved in clarity, cohesion, and adherence to Clean Code principles without changing its external behaviour.
 
-## Resumen
+## Summary
 
-El Apéndice B no es lectura autónoma: es el material de referencia del caso de estudio del capítulo 16. Su valor está en permitir que el lector sea partícipe activo de la refactorización, comprobando cada heurística aplicada contra el código original de JCommon.
+Appendix B is not standalone reading — it is the reference material for the Chapter 16 case study. Its value lies in allowing readers to be active participants in the refactoring, verifying each applied heuristic against the original JCommon code.

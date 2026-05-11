@@ -9,34 +9,34 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
-El capítulo 16 es un caso de estudio sobre la clase `org.jfree.date.SerialDate` de la librería JCommon. El autor primero la hace funcionar correctamente y luego la refactoriza en profundidad, aplicando un amplio catálogo de heurísticas de código limpio.
+Chapter 16 is a case study on the `org.jfree.date.SerialDate` class from the JCommon library. The author first makes it work correctly, then refactors it in depth, applying a broad catalogue of clean code heuristics.
 
 <!--more-->
 
-## Primer paso: hacer que funcione
+## First Step: Make It Work
 
-Al ejecutar los tests existentes contra `SerialDate`, varios fallan. El análisis revela dos problemas:
+Running the existing tests against `SerialDate` reveals several failures. Analysis uncovers two problems:
 
-- Un error de límite en `getFollowingDayOfWeek`: la condición de ajuste era incorrecta para ciertos días de la semana.
-- Los métodos `weekInMonthToString` y `relativeToString` devolvían strings de error en lugar de lanzar `IllegalArgumentException`.
+- A boundary error in `getFollowingDayOfWeek`: the adjustment condition was incorrect for certain days of the week.
+- The `weekInMonthToString` and `relativeToString` methods returned error strings instead of throwing `IllegalArgumentException`.
 
-Tras corregir estos errores, todos los tests de JCommon pasan.
+After fixing these bugs, all JCommon tests pass.
 
-## Segundo paso: hacerlo bien
+## Second Step: Do It Right
 
-A continuación, se recorre la clase de arriba a abajo aplicando mejoras.
+The class is then walked through from top to bottom, applying improvements.
 
-### Eliminar el historial de cambios [C1]
+### Remove the change history [C1]
 
-El largo bloque de comentarios con historial de versiones es un vestigio del pasado. Los sistemas de control de versiones modernos ya almacenan esa información.
+The lengthy block of version-history comments is a relic of the past. Modern version control systems already store that information.
 
-### Renombrar `SerialDate` → `DayDate` [N1, N2]
+### Rename `SerialDate` → `DayDate` [N1, N2]
 
-El nombre "SerialDate" describe una implementación concreta (representación por número serial), pero la clase es abstracta. Un nombre abstracto como `DayDate` es más apropiado para una clase base.
+The name "SerialDate" describes a concrete implementation (serial-number representation), but the class is abstract. An abstract name such as `DayDate` is more appropriate for a base class.
 
-### Reemplazar `MonthConstants` por un enum `Month` [J2]
+### Replace `MonthConstants` with a `Month` enum [J2]
 
-Heredar de una interfaz para obtener constantes es un mal truco de Java. Se reemplaza con un enum propio:
+Inheriting from an interface to obtain constants is a bad Java trick. It is replaced with a dedicated enum:
 
 ```java
 public static enum Month {
@@ -46,21 +46,21 @@ public static enum Month {
 }
 ```
 
-Esto elimina `isValidMonthCode` y toda la validación manual de códigos de mes [G5].
+This eliminates `isValidMonthCode` and all manual month-code validation [G5].
 
-### Convertir otros conjuntos de constantes en enums [J3]
+### Convert other constant sets to enums [J3]
 
 - `WeekInMonth`: FIRST, SECOND, THIRD, FOURTH, LAST
-- `DateInterval`: CLOSED, CLOSED_LEFT, CLOSED_RIGHT, OPEN (nomenclatura matemática más clara [N3])
+- `DateInterval`: CLOSED, CLOSED_LEFT, CLOSED_RIGHT, OPEN (clearer mathematical nomenclature [N3])
 - `WeekdayRange`: LAST, NEXT, NEAREST
 
-### Mover constantes al nivel correcto [G6]
+### Move constants to the correct level [G6]
 
-`EARLIEST_DATE_ORDINAL` y `LATEST_DATE_ORDINAL` solo los usa `SpreadsheetDate`, así que se mueven allí. `MINIMUM_YEAR_SUPPORTED` y `MAXIMUM_YEAR_SUPPORTED` también se desplazan a la subclase.
+`EARLIEST_DATE_ORDINAL` and `LATEST_DATE_ORDINAL` are only used by `SpreadsheetDate`, so they are moved there. `MINIMUM_YEAR_SUPPORTED` and `MAXIMUM_YEAR_SUPPORTED` are likewise moved to the subclass.
 
-### Introducir `DayDateFactory` [G7]
+### Introduce `DayDateFactory` [G7]
 
-Una clase base no debe conocer a sus derivadas. Se introduce el patrón ABSTRACT FACTORY:
+A base class should not know about its derived classes. The ABSTRACT FACTORY pattern is introduced:
 
 ```java
 public abstract class DayDateFactory {
@@ -71,41 +71,41 @@ public abstract class DayDateFactory {
 }
 ```
 
-### Extraer `Day` a su propio fichero [G13]
+### Extract `Day` to its own file [G13]
 
-El enum `Day` es suficientemente grande e independiente de `DayDate` como para vivir en su propio fichero fuente.
+The `Day` enum is large enough and independent enough from `DayDate` to warrant its own source file.
 
-### Mover métodos al lugar correcto [G14, Feature Envy]
+### Move methods to the right place [G14, Feature Envy]
 
-- `monthCodeToQuarter` → método `quarter()` en el enum `Month`
-- `monthCodeToString` / `weekdayCodeToString` → métodos `toString()` y `toShortString()` en los enums correspondientes
+- `monthCodeToQuarter` → `quarter()` method on the `Month` enum
+- `monthCodeToString` / `weekdayCodeToString` → `toString()` and `toShortString()` methods on their respective enums
 - `stringToMonthCode` → `Month.parse(String s)`
 - `stringToWeekdayCode` → `Day.parse(String s)`
 
-### Mejoras adicionales
+### Additional improvements
 
-- `isLeapYear` se reescribe de forma más expresiva con variables intermedias [G16]
-- `leapYearCount` se mueve a `SpreadsheetDate` donde realmente se usa [G6]
-- `addDays` deja de ser estático y pasa a ser un método de instancia [G18]
-- Se eliminan Javadocs redundantes y comentarios obsoletos [C2, C3]
-- Se eliminan `final` en argumentos y variables locales (añaden ruido sin valor) [G12]
+- `isLeapYear` is rewritten more expressively using intermediate variables [G16]
+- `leapYearCount` is moved to `SpreadsheetDate` where it is actually used [G6]
+- `addDays` is converted from a static method to an instance method [G18]
+- Redundant Javadocs and stale comments are removed [C2, C3]
+- `final` on arguments and local variables is removed (it adds noise without benefit) [G12]
 
-## Reglas clave
+## Key Rules
 
-| Código | Regla aplicada |
-|--------|---------------|
-| C1–C3 | Comentarios: eliminar historial, obsoletos, redundantes |
-| G5 | No duplicar: usar enums en lugar de validación manual |
-| G6 | Código al nivel de abstracción correcto |
-| G7 | Las clases base no deben conocer a sus derivadas |
-| G12 | Eliminar clutter (constructores vacíos, `final` innecesarios) |
-| G13 | Evitar acoplamiento artificial |
-| G14 | Evitar Feature Envy: mover métodos a donde pertenecen |
-| G16 | Variables intermedias para claridad |
-| G18 | Preferir métodos de instancia a estáticos |
-| J2–J3 | No heredar constantes; usar enums |
-| N1–N3 | Nombres descriptivos, nivel de abstracción correcto, nomenclatura estándar |
+| Code | Rule applied |
+|------|-------------|
+| C1–C3 | Comments: remove history, stale, and redundant comments |
+| G5 | No duplication: use enums instead of manual validation |
+| G6 | Code at the correct level of abstraction |
+| G7 | Base classes must not know about their derived classes |
+| G12 | Remove clutter (empty constructors, unnecessary `final`) |
+| G13 | Avoid artificial coupling |
+| G14 | Avoid Feature Envy: move methods to where they belong |
+| G16 | Intermediate variables for clarity |
+| G18 | Prefer instance methods to static methods |
+| J2–J3 | Do not inherit constants; use enums |
+| N1–N3 | Descriptive names, correct abstraction level, standard nomenclature |
 
-## Resumen
+## Summary
 
-La refactorización de `SerialDate` es un ejemplo completo de cómo convertir una clase funcional pero mejorable en una clase limpia. La estrategia "primero hazlo funcionar, luego hazlo bien" permite aplicar cambios con confianza, respaldados en todo momento por los tests.
+The refactoring of `SerialDate` is a complete example of how to transform a functional but improvable class into a clean one. The "make it work first, then do it right" strategy allows changes to be applied with confidence, backed at every step by the tests.

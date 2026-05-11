@@ -9,15 +9,15 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
-El Apéndice A, escrito por Brett L. Schuchert, amplía el capítulo 13 sobre concurrencia con análisis más profundos: ejemplo cliente/servidor, posibles caminos de ejecución, interbloqueo y estrategias de incremento de throughput.
+Appendix A, written by Brett L. Schuchert, extends Chapter 13 on concurrency with deeper analysis: a client/server example, possible execution paths, deadlock, and strategies for increasing throughput.
 
 <!--more-->
 
-## Ejemplo Cliente/Servidor
+## Client/Server Example
 
-### Versión de un solo hilo
+### Single-threaded Version
 
-Un servidor espera en un socket, procesa cada petición y vuelve a esperar. Un test de rendimiento exige que procese un conjunto de peticiones en menos de 10 segundos:
+A server waits on a socket, processes each request, and waits again. A performance test requires it to process a set of requests in under 10 seconds:
 
 ```java
 @Test(timeout = 10000)
@@ -28,16 +28,16 @@ public void shouldRunInUnder10Seconds() throws Exception {
 }
 ```
 
-Si el test falla, la pregunta es: ¿dónde se gasta el tiempo?
+If the test fails, the question is: where is the time being spent?
 
-- **Operaciones de I/O** (sockets, bases de datos, memoria virtual): la CPU espera.
-- **Operaciones de CPU** (cálculos, regex, GC): la CPU trabaja.
+- **I/O operations** (sockets, databases, virtual memory): the CPU waits.
+- **CPU operations** (calculations, regex, GC): the CPU works.
 
-Si el sistema es I/O-bound, el multithreading puede mejorar el rendimiento al solapar esperas con procesamiento.
+If the system is I/O-bound, multithreading can improve performance by overlapping waits with processing.
 
-### Añadiendo hilos
+### Adding Threads
 
-Una solución naive es crear un hilo por cada petición:
+A naive solution is to create one thread per request:
 
 ```java
 void process(final Socket socket) {
@@ -52,11 +52,11 @@ void process(final Socket socket) {
 }
 ```
 
-Esto pasa el test, pero viola el Principio de Responsabilidad Única. La función `process` gestiona simultáneamente: conexión de sockets, procesamiento de clientes, política de threading y política de cierre.
+This makes the test pass, but it violates the Single Responsibility Principle. The `process` function simultaneously manages: socket connections, client processing, threading policy, and shutdown policy.
 
-### Diseño limpio con SRP
+### Clean Design with SRP
 
-Se introduce una interfaz `ClientScheduler` que aísla toda la lógica de threading:
+A `ClientScheduler` interface is introduced to isolate all threading logic:
 
 ```java
 public interface ClientScheduler {
@@ -64,88 +64,88 @@ public interface ClientScheduler {
 }
 ```
 
-Implementaciones intercambiables: `ThreadPerRequestScheduler` y `ExecutorClientScheduler` (usando `java.util.concurrent.Executors.newFixedThreadPool`). El código de negocio no sabe nada sobre los hilos.
+Interchangeable implementations: `ThreadPerRequestScheduler` and `ExecutorClientScheduler` (using `java.util.concurrent.Executors.newFixedThreadPool`). Business code knows nothing about threads.
 
-## Posibles caminos de ejecución
+## Possible Execution Paths
 
-Una línea Java aparentemente inocua puede expandirse en varios bytecodes JVM:
+An apparently innocent Java line can expand into several JVM bytecodes:
 
 ```java
 return ++lastIdUsed;
 ```
 
-Esta operación comprende: leer `lastIdUsed`, incrementar, escribir y retornar. Con dos hilos que empiezan con `lastIdUsed = 93`, los posibles resultados son:
+This operation comprises: reading `lastIdUsed`, incrementing, writing, and returning. With two threads starting with `lastIdUsed = 93`, the possible outcomes are:
 
-- T1 obtiene 94, T2 obtiene 95, `lastIdUsed` = 95 ✓
-- T1 obtiene 95, T2 obtiene 94, `lastIdUsed` = 95 ✓
-- T1 obtiene 94, T2 obtiene 94, `lastIdUsed` = 94 ✗ (condición de carrera)
+- T1 gets 94, T2 gets 95, `lastIdUsed` = 95 ✓
+- T1 gets 95, T2 gets 94, `lastIdUsed` = 95 ✓
+- T1 gets 94, T2 gets 94, `lastIdUsed` = 94 ✗ (race condition)
 
-El número de posibles caminos de ejecución para N bytecodes y T hilos crece exponencialmente. Para evitar resultados incorrectos, las secciones críticas deben protegerse con `synchronized` o usando clases del paquete `java.util.concurrent.atomic`.
+The number of possible execution paths for N bytecodes and T threads grows exponentially. To prevent incorrect results, critical sections must be protected with `synchronized` or by using classes from the `java.util.concurrent.atomic` package.
 
-## Interbloqueo (Deadlock)
+## Deadlock
 
-### Las cuatro condiciones
+### The Four Conditions
 
-El interbloqueo requiere que se cumplan simultáneamente cuatro condiciones:
+Deadlock requires four conditions to hold simultaneously:
 
-1. **Exclusión mutua**: el recurso no puede usarse por varios hilos a la vez.
-2. **Lock & Wait**: un hilo retiene un recurso mientras espera obtener otro.
-3. **No expropiación**: un hilo no puede quitarle un recurso a otro.
-4. **Espera circular**: T1 espera un recurso que tiene T2, y T2 espera uno que tiene T1.
+1. **Mutual exclusion**: the resource cannot be used by more than one thread at a time.
+2. **Lock & Wait**: a thread holds a resource while waiting to acquire another.
+3. **No preemption**: a thread cannot forcibly take a resource from another.
+4. **Circular wait**: T1 waits for a resource held by T2, and T2 waits for one held by T1.
 
-### Ejemplo concreto
+### Concrete Example
 
-Un servidor web con dos pools (conexiones DB y conexiones MQ):
+A web server with two pools (DB connections and MQ connections):
 
-- Los hilos de "crear" adquieren DB primero, luego MQ.
-- Los hilos de "actualizar" adquieren MQ primero, luego DB.
+- "Create" threads acquire DB first, then MQ.
+- "Update" threads acquire MQ first, then DB.
 
-Si todos los recursos de un tipo se agotan en el momento equivocado, el sistema se bloquea indefinidamente.
+If all resources of one type are exhausted at the wrong moment, the system locks up indefinitely.
 
-### Romper el interbloqueo
+### Breaking Deadlock
 
-Basta con romper *una* de las cuatro condiciones:
+It is sufficient to break *one* of the four conditions:
 
-| Condición | Estrategia |
-|-----------|-----------|
-| Exclusión mutua | Usar recursos concurrentes (`AtomicInteger`); aumentar el número de recursos |
-| Lock & Wait | Verificar disponibilidad antes de adquirir; si alguno está ocupado, liberar todos y reintentar |
-| No expropiación | Raramente aplicable directamente |
-| Espera circular | Acordar un orden global para la adquisición de recursos y respetarlo siempre |
+| Condition | Strategy |
+|-----------|----------|
+| Mutual exclusion | Use concurrent resources (`AtomicInteger`); increase the number of resources |
+| Lock & Wait | Check availability before acquiring; if any is unavailable, release all and retry |
+| No preemption | Rarely applicable directly |
+| Circular wait | Agree on a global resource acquisition order and always follow it |
 
-La estrategia más robusta es ordenar los recursos: si todos los hilos adquieren siempre los recursos en el mismo orden (primero DB, luego MQ), la espera circular es imposible.
+The most robust strategy is to order resources: if all threads always acquire resources in the same order (DB first, then MQ), circular wait becomes impossible.
 
-## Locking en cliente vs servidor
+## Client-Side vs Server-Side Locking
 
-El locking en el cliente (cada consumidor sincroniza antes de usar el objeto) tiene múltiples problemas: duplicación, propensión a errores y acoplamiento. El locking en el servidor (el propio objeto sincroniza sus métodos) es preferible:
+Client-side locking (each consumer synchronises before using the object) has multiple problems: duplication, error-proneness, and coupling. Server-side locking (the object synchronises its own methods) is preferable:
 
-- Reduce código repetido.
-- Permite intercambiar una implementación thread-safe por una no thread-safe en despliegues de un solo hilo.
-- Centraliza la política: si hay un error de concurrencia, hay un solo lugar donde buscar.
+- Reduces repeated code.
+- Allows swapping a thread-safe implementation for a non-thread-safe one in single-threaded deployments.
+- Centralises the policy: if there is a concurrency bug, there is one place to look.
 
-Si no se puede modificar el servidor, se usa un ADAPTER que añade sincronización alrededor de la API existente.
+If the server cannot be modified, use an ADAPTER that adds synchronisation around the existing API.
 
-## Incremento de throughput
+## Increasing Throughput
 
-Para un sistema que descarga páginas y las procesa:
+For a system that downloads pages and processes them:
 
-- Tiempo de I/O por página: 1 s (0% CPU)
-- Tiempo de procesamiento: 0,5 s (100% CPU)
+- I/O time per page: 1 s (0% CPU)
+- Processing time: 0.5 s (100% CPU)
 
-Con un solo hilo: 1,5 s × N páginas.
+With a single thread: 1.5 s × N pages.
 
-Con tres hilos: las descargas se solapan con el procesamiento. Throughput ≈ 3×. La clave es mantener el bloque `synchronized` tan pequeño como sea posible (solo la sección crítica de obtención de la siguiente URL).
+With three threads: downloads overlap with processing. Throughput ≈ 3×. The key is to keep the `synchronized` block as small as possible (only the critical section that fetches the next URL).
 
-## Reglas clave
+## Key Rules
 
-| Principio | Descripción |
+| Principle | Description |
 |-----------|-------------|
-| SRP en concurrencia | El código que gestiona hilos no debe hacer nada más |
-| Secciones críticas pequeñas | Sincronizar lo mínimo indispensable |
-| Clases thread-safe del JDK | Preferir `java.util.concurrent` a gestión manual |
-| Orden de adquisición de recursos | La estrategia más eficaz contra el interbloqueo |
-| Testing de concurrencia | Variar configuraciones, número de hilos y cargas para exponer condiciones de carrera |
+| SRP in concurrency | Code that manages threads should do nothing else |
+| Small critical sections | Synchronise only the absolute minimum |
+| JDK thread-safe classes | Prefer `java.util.concurrent` over manual management |
+| Resource acquisition order | The most effective strategy against deadlock |
+| Concurrency testing | Vary configurations, thread counts, and loads to expose race conditions |
 
-## Resumen
+## Summary
 
-La concurrencia exige disciplina adicional: el SRP aplicado a los hilos, la conciencia de los posibles caminos de ejecución y el conocimiento de las cuatro condiciones del interbloqueo son las herramientas fundamentales para escribir sistemas concurrentes correctos y mantenibles.
+Concurrency demands additional discipline: the SRP applied to threading code, awareness of possible execution paths, and knowledge of the four deadlock conditions are the fundamental tools for writing correct and maintainable concurrent systems.

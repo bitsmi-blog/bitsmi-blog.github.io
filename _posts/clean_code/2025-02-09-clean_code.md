@@ -33,7 +33,7 @@ If cleanup is deferred with "We will review it later", it will never happen.
 
 Teams that move fast early on can find themselves nearly paralyzed after a year or two. Every change requires understanding a tangled web of code. Management may add staff to fix the productivity loss — but new team members, unfamiliar with the codebase, often make the mess worse.
 
-**Conclusion**: keeping code clean is not only cost effective but a matter of professional survival.
+**Conclusion**: keeping code clean is not only cost-effective but a matter of professional survival.
 
 ## Attitude
 

@@ -9,29 +9,29 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
-El capítulo 15 estudia en profundidad la clase `ComparisonCompactor` del framework JUnit, demostrando cómo aplicar las reglas del Código Limpio a un módulo ya bien escrito mediante el principio "Boy Scout": dejar el código mejor de como lo encontramos.
+Chapter 15 examines the `ComparisonCompactor` class from the JUnit framework in depth, demonstrating how to apply Clean Code rules to an already well-written module using the Boy Scout principle: leave the code better than you found it.
 
 <!--more-->
 
-## Qué hace ComparisonCompactor
+## What ComparisonCompactor Does
 
-`ComparisonCompactor` produce mensajes de error legibles en fallos de aserción de igualdad. Dado `contextLength`, `expected` y `actual`, genera cadenas del estilo:
+`ComparisonCompactor` produces readable error messages for equality assertion failures. Given `contextLength`, `expected`, and `actual`, it generates strings such as:
 
 ```
 expected: <...B[X]D...>  but was: <...B[Y]D...>
 ```
 
-Los corchetes encierran la parte diferente; los puntos suspensivos indican contexto recortado. El módulo tenía cobertura de tests del 100%.
+The brackets enclose the differing portion; the ellipses indicate trimmed context. The module had 100% test coverage.
 
-## Código original (Listing 15-2)
+## Original Code (Listing 15-2)
 
-El original era código correcto pero mejorable. Variables privadas con prefijo `f` (`fContextLength`, `fExpected`, `fActual`, `fPrefix`, `fSuffix`), una condición negativa sin encapsular en `compact()` y nombres que no describían bien la intención.
+The original was correct but improvable code. Private variables used an `f` prefix (`fContextLength`, `fExpected`, `fActual`, `fPrefix`, `fSuffix`), a negative conditional in `compact()` was not encapsulated, and several names did not clearly convey intent.
 
-## Pasos de refactorización
+## Refactoring Steps
 
-### 1. Eliminar el prefijo `f` en variables miembro [N6]
+### 1. Remove the `f` prefix from member variables [N6]
 
-Los entornos modernos hacen innecesario este tipo de encoding de alcance:
+Modern environments make this kind of scope encoding unnecessary:
 
 ```java
 private int contextLength;
@@ -41,7 +41,7 @@ private int prefix;
 private int suffix;
 ```
 
-### 2. Encapsular la condicional negativa [G28]
+### 2. Encapsulate the negative conditional [G28]
 
 ```java
 if (shouldNotCompact())
@@ -52,9 +52,9 @@ private boolean shouldNotCompact() {
 }
 ```
 
-### 3. Invertir a positivo [G29]
+### 3. Invert to a positive conditional [G29]
 
-Las negaciones son más difíciles de leer. Se renombra y se invierte:
+Negative conditions are harder to read. The method is renamed and its logic inverted:
 
 ```java
 if (canBeCompacted()) { ... }
@@ -64,21 +64,21 @@ private boolean canBeCompacted() {
 }
 ```
 
-### 4. Renombrar `compact` → `formatCompactedComparison` [N7]
+### 4. Rename `compact` → `formatCompactedComparison` [N7]
 
-El nombre `compact` ocultaba el efecto lateral de la comprobación de error y el retorno de un mensaje formateado.
+The name `compact` obscured the side effect of the error check and the return of a formatted message.
 
-### 5. Extraer `compactExpectedAndActual()` [G30]
+### 5. Extract `compactExpectedAndActual()` [G30]
 
-La función debe hacer una sola cosa: el cuerpo del `if` se extrae a un método separado. `compactExpected` y `compactActual` se promueven a variables miembro para mantener consistencia de retorno [G11].
+A function should do one thing: the body of the `if` is extracted into a separate method. `compactExpected` and `compactActual` are promoted to member variables to maintain return-value consistency [G11].
 
-### 6. Exponer el acoplamiento temporal [G31]
+### 6. Expose the temporal coupling [G31]
 
-`findCommonSuffix` dependía de que `findCommonPrefix` se ejecutara antes. Solución: fusionar en `findCommonPrefixAndSuffix()`, que llama a `findCommonPrefix` internamente antes de calcular el sufijo.
+`findCommonSuffix` depended on `findCommonPrefix` having been called first. The fix is to merge them into `findCommonPrefixAndSuffix()`, which calls `findCommonPrefix` internally before computing the suffix.
 
-### 7. Renombrar `suffixIndex` → `suffixLength` [N1, G33]
+### 7. Rename `suffixIndex` → `suffixLength` [N1, G33]
 
-`suffixIndex` era en realidad una longitud 1-based que introducía `+1` artificiales en `computeCommonSuffix`. Al renombrarlo y ajustar la aritmética, los `+1` desaparecen y `compactString` puede simplificarse a:
+`suffixIndex` was actually a 1-based length that introduced artificial `+1` offsets throughout `computeCommonSuffix`. Renaming it and adjusting the arithmetic removes those offsets, and `compactString` can be simplified to:
 
 ```java
 private String compactString(String source) {
@@ -90,25 +90,25 @@ private String compactString(String source) {
 }
 ```
 
-## Versión final (Listing 15-5)
+## Final Version (Listing 15-5)
 
-El resultado es una clase con ~10 métodos pequeños, cada uno con un nombre que dice lo que hace. Los métodos `startingEllipsis()`, `startingContext()`, `delta()`, `endingContext()` y `endingEllipsis()` componen el resultado de forma legible en `compact(String s)`.
+The result is a class with roughly 10 small methods, each named to describe what it does. The methods `startingEllipsis()`, `startingContext()`, `delta()`, `endingContext()`, and `endingEllipsis()` compose the output in a readable way inside `compact(String s)`.
 
-## Reglas clave
+## Key Rules
 
-| Código | Regla aplicada |
-|--------|---------------|
-| N1 | Nombres descriptivos |
-| N6 | Evitar encodings (prefijo `f`) |
-| N7 | Los nombres deben describir los efectos secundarios |
-| G9 | Eliminar código muerto / sentencias redundantes |
-| G11 | Consistencia en convenciones |
-| G28 | Encapsular condicionales |
-| G29 | Evitar condicionales negativos |
-| G30 | Las funciones deben hacer una sola cosa |
-| G31 | Exponer acoplamientos temporales |
-| G33 | Eliminar los `+1` artificiales con nombres adecuados |
+| Code | Rule applied |
+|------|-------------|
+| N1 | Descriptive names |
+| N6 | Avoid encodings (`f` prefix) |
+| N7 | Names must describe side effects |
+| G9 | Remove dead code and redundant statements |
+| G11 | Consistency in conventions |
+| G28 | Encapsulate conditionals |
+| G29 | Avoid negative conditionals |
+| G30 | Functions must do one thing |
+| G31 | Expose temporal couplings |
+| G33 | Eliminate artificial `+1` offsets with proper names |
 
-## Resumen
+## Summary
 
-El capítulo demuestra que incluso código bien escrito admite mejoras. A través de pequeños pasos —cada uno guiado por una heurística concreta— la clase `ComparisonCompactor` pasa de ser *buena* a ser *limpia*: más expresiva, más cohesiva y sin acoplamientos ocultos.
+This chapter demonstrates that even well-written code can be improved. Through small steps — each guided by a specific heuristic — `ComparisonCompactor` goes from being *good* to being *clean*: more expressive, more cohesive, and free of hidden couplings.
