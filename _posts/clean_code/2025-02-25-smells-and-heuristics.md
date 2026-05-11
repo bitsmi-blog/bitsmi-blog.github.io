@@ -1,6 +1,6 @@
 ---
 author: Xavier Salvador
-title: 17.- Heuristics and systems
+title: 17.- Smells and Heuristics
 page_order: 17
 date: 2025-02-25
 categories: [ "clean_code" ]

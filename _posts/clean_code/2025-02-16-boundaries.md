@@ -1,6 +1,6 @@
 ---
 author: Xavier Salvador
-title: 8.- Limitations
+title: 8.- Boundaries
 page_order: 08
 date: 2025-02-16
 categories: [ "clean_code" ]
