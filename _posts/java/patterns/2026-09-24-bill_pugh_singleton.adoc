@@ -7,13 +7,13 @@ layout: post
 excerpt_separator: <!--more-->
 ---
 
-Singleton is a creational design pattern intended to provide a single object instance for a class. Some basic characteristics for this patterns are:
+Singleton is a creational design pattern intended to provide a single object instance for a class. Some basic characteristics for this pattern are:
 
 * Private constructors to prevent instantiation with the new operator
 * A public static method `getInstance()` to return a single instance of the class
 * A private static variable to store the only instance of the class
 
-Singleton use cases includes:
+Singleton use case includes:
 
 * Connection pools
 * Logging frameworks
@@ -52,11 +52,11 @@ Although the implementation shown above works in most situations, it suffers fro
 
 One possible solution to this problem is to implement a synchronized block to check if there is a null instance in the `getInstance()` method, but this is costly because it will lock and cause performance issues when multiple threads frequently access this method.
 
-We can solve this performance issue initializing the singleton instance at application startup, ensuring that instance creation is performed by a single thread. This way, all the calls to `getInstance()` made during the app's execution get the same object instance, even if they are made from multiple threads at same time. This solution makes it impossible to take advantage of one of the benefits provided by the singleton pattern to lazily load objects only when they are needed.
+We can solve this performance issue initializing the singleton instance at application startup, ensuring that instance creation is performed by a single thread. This way, all the calls to `getInstance()` made during the app's execution get the same object instance, even if they are made from multiple threads at same time. This solution makes it impossible to take advantage of one of the benefits provided by the singleton pattern to lazily load objects only when they are needed. 
 
 == Bill Pugh Singleton implementation
 
-The main idea is that the inner static helper class (`SingletonHelper` in the example below) is loaded only when the `getInstance()` method is called. The Java class loader ensures that the initialization of the helper class (and thus the creation of the singleton instance) is thread-safe.
+To solve the problem described, we can make use of Bill Pugh Singleton implementation. The main idea is that the inner static helper class (`SingletonHelper` in the example below) is loaded only when the `getInstance()` method is called. The Java class loader ensures that the initialization of the helper class (and thus the creation of the singleton instance) is thread-safe.
 
 The Java Language Specification (JLS) guarantees that class initialization is sequential and non-concurrent. When the outer class `Singleton` is loaded, the inner class `SingletonHelper` is not initialized until it's explicitly referenced. The first call to `getInstance()` triggers the initialization of `SingletonHelper`, which creates the singleton instance. Since class initialization is guaranteed to be thread-safe by the JLS, no additional synchronization is required.
 
@@ -70,7 +70,7 @@ public class Singleton {
         private static final Singleton instance = new Singleton();
     }
  
-    public static BillPughSingleton getInstance() {
+    public static Singleton getInstance() {
         return SingletonHelper.instance;
     }
 }
@@ -110,5 +110,4 @@ When to choose *Bill Pugh* over *Enum*:
 
 * Need to extend a class (enums cannot extend other classes)
 * Need lazy initialization for resource-intensive objects
-* Singleton needs to implement multiple interfaces
 * Need more control over the initialization process
