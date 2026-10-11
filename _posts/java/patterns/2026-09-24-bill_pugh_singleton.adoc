@@ -1,0 +1,113 @@
+---
+author: Antonio Archilla
+title: Bill Pugh Singleton
+date: 2026-09-24
+categories: [ "java", "patterns" ]
+layout: post
+excerpt_separator: <!--more-->
+---
+
+Singleton is a creational design pattern intended to provide a single object instance for a class. Some basic characteristics for this pattern are:
+
+* Private constructors to prevent instantiation with the new operator
+* A public static method `getInstance()` to return a single instance of the class
+* A private static variable to store the only instance of the class
+
+Singleton use case includes:
+
+* Connection pools
+* Logging frameworks
+* Configuration managers
+* Thread pools
+* Caches
+
+// <!--more-->
+
+A traditional implementation for this pattern looks like:
+
+[source,java]
+----
+public class Singleton {
+
+	private static Singleton instance;
+	
+	private Singleton() {
+		// Object initialization
+	}
+
+	public static Singleton getInstance() {
+		if (instance == null) {
+			instance = new Singleton();
+		}
+		return instance;
+	}
+	
+	// . . .
+]
+----
+
+== Problem
+
+Although the implementation shown above works in most situations, it suffers from a race condition problem when `getInstance()` method is accessed for first time by 2 different threads. In that case it is possible that the conditional check is evaluated as `true` by both threads, making the resolution of the `instance` variable uncertain.
+
+One possible solution to this problem is to implement a synchronized block to check if there is a null instance in the `getInstance()` method, but this is costly because it will lock and cause performance issues when multiple threads frequently access this method.
+
+We can solve this performance issue initializing the singleton instance at application startup, ensuring that instance creation is performed by a single thread. This way, all the calls to `getInstance()` made during the app's execution get the same object instance, even if they are made from multiple threads at same time. This solution makes it impossible to take advantage of one of the benefits provided by the singleton pattern to lazily load objects only when they are needed. 
+
+== Bill Pugh Singleton implementation
+
+To solve the problem described, we can make use of Bill Pugh Singleton implementation. The main idea is that the inner static helper class (`SingletonHelper` in the example below) is loaded only when the `getInstance()` method is called. The Java class loader ensures that the initialization of the helper class (and thus the creation of the singleton instance) is thread-safe.
+
+The Java Language Specification (JLS) guarantees that class initialization is sequential and non-concurrent. When the outer class `Singleton` is loaded, the inner class `SingletonHelper` is not initialized until it's explicitly referenced. The first call to `getInstance()` triggers the initialization of `SingletonHelper`, which creates the singleton instance. Since class initialization is guaranteed to be thread-safe by the JLS, no additional synchronization is required.
+
+[source,java]
+----
+public class Singleton {
+
+    private Singleton() {}
+ 
+    private static class SingletonHelper {
+        private static final Singleton instance = new Singleton();
+    }
+ 
+    public static Singleton getInstance() {
+        return SingletonHelper.instance;
+    }
+}
+----
+
+Advantages of Bill Pugh Singleton:
+
+* Lazy Initialization: The instance is created only when getInstance is called for the first time.
+* Thread Safety: Achieved through the Java class loader's guarantees without explicit synchronization.
+* Efficiency: No unnecessary synchronization overhead after the instance is created.
+* Simplicity: The implementation is clean and easy to understand.
+
+== Enum Singleton implementation
+
+Joshua Bloch, in his book *Effective Java*, recommends using a single-element enum as the best way to implement a singleton in Java. Here's how the enum singleton looks:
+
+[source,java]
+----
+public enum EnumSingleton {
+
+    INSTANCE;
+ 
+    public void doSomething() {
+        // Singleton logic here
+    }
+}
+----
+
+Enum Singleton advantages:
+
+* Thread-safe by default
+* Serialization handled automatically
+* Protection against reflection attacks
+* Concise syntax
+
+When to choose *Bill Pugh* over *Enum*:
+
+* Need to extend a class (enums cannot extend other classes)
+* Need lazy initialization for resource-intensive objects
+* Need more control over the initialization process
